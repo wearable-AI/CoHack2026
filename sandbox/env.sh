@@ -13,8 +13,8 @@ COLIMA_PROFILE=cohack
 
 GKE_CLUSTER=cohack
 GKE_ZONE=us-central1-a
-GKE_NODES=2
-GKE_MACHINE=e2-standard-4
+GKE_NODES=3                   # measured on kind: 2.8 cores, 7.1 GiB at 5 users
+GKE_MACHINE=e2-standard-2     # 6 vCPUs, under a free trial's vCPU cap
 GCP_CONFIG=cohack
 
 # Isolation: the sandbox has its own kubeconfig and its own gcloud
