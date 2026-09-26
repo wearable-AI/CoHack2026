@@ -66,6 +66,30 @@ used 2.8 cores and 7.1 GiB with 5 simulated users. A free trial project had a li
 vCPUs across all regions, so 6 leaves room for a node upgrade. The cost is roughly $5 a day.
 Check the current GCP price list. On GKE, each container log also goes to Cloud Logging.
 
+### 4. A teammate joins
+
+The project owner grants two roles on the project, not on the organization:
+
+```sh
+gcloud projects add-iam-policy-binding <project-id> --member=user:<her-email> --role=roles/viewer --configuration=cohack
+gcloud projects add-iam-policy-binding <project-id> --member=user:<her-email> --role=roles/container.developer --configuration=cohack
+```
+
+`roles/viewer` shows the console, the logs and the VMs. `roles/container.developer` gives
+full `kubectl` access to the workloads. Neither role can create or delete a cluster, or
+touch billing or access.
+
+The teammate then runs, on her laptop:
+
+```sh
+gcloud config configurations create cohack --no-activate
+gcloud auth login --configuration=cohack
+gcloud config set project <project-id> --configuration=cohack
+cp sandbox/.env.local.example sandbox/.env.local    # her email, the same project
+sandbox/gke-connect.sh
+sandbox/forward.sh gke
+```
+
 ## The fake GitHub org
 
 1. Create a free org in the GitHub web UI: <https://github.com/account/organizations/new>.
