@@ -1,8 +1,9 @@
 # CoHack2026
 
 At a company with many small services, a new developer cannot see how one request moves
-through the system. Our product shows it to them as a short animation, made from the
-company's real data, inside their AI coding assistant.
+through the system, and a person who must explain a complex idea has no picture to show. Our
+tool runs inside the developer's AI harness. The agent calls it, and it returns a short
+animation made from the company's real data.
 
 ## An everyday picture
 
@@ -53,8 +54,9 @@ single screen shows the whole order.
 2. **Join.** Put the pieces in order, with the order number and the trace ids.
 3. **Show.** Make a short animation of the journey with `vizln/`. Every number on screen comes
    from the real data.
-4. **Where.** A developer asks their AI assistant "how does checkout work?", and the animation
-   comes back.
+4. **Where.** The developer's AI harness (for example Claude Code) is configured to use the
+   tool. A frustrated developer asks "how does checkout work?" or "why did this order fail?".
+   The agent calls the tool, and the animation comes back in the same session.
 
 ## The demo story, about 3 minutes
 
@@ -83,7 +85,6 @@ single screen shows the whole order.
 |---|---|
 | `vizln/` | the animation engine, the method, and three example clips in `vizln/demo/` |
 | `sandbox/` | scripts that run the fake company on GKE or on a laptop |
-| `backend/` | the web backend, in progress |
 
 ## Words
 
