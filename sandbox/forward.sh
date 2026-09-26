@@ -12,4 +12,9 @@ case "${1:-}" in
 esac
 need_ctx
 echo "http://localhost:$PORT  store /  jaeger /jaeger/ui/  grafana /grafana/  flags /feature  load /loadgen/"
-k port-forward svc/frontend-proxy "$PORT:8080"
+# kubectl port-forward exits on "lost connection to pod", so reconnect until Ctrl-C
+while true; do
+  k port-forward svc/frontend-proxy "$PORT:8080" || true
+  echo "port-forward dropped, reconnecting" >&2
+  sleep 1
+done
