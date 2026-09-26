@@ -55,15 +55,16 @@ Set a budget alert at <https://console.cloud.google.com/billing/budgets>.
 ### 3. Run it
 
 ```sh
+sandbox/quota.sh                 # enables the APIs, compares vCPUs with the limits
 sandbox/gke-up.sh                # zonal cluster, 3 x e2-standard-2, then the chart
 sandbox/forward.sh gke
 sandbox/gke-down.sh              # delete the cluster after the demo
 ```
 
 Three `e2-standard-2` nodes give 6 vCPUs and 24 GB. On the local cluster the whole company
-used 2.8 cores and 7.1 GiB with 5 simulated users. A free trial caps the vCPUs that run at one
-time, and 6 leaves room for a node upgrade. The cost is roughly $5 a day; check the current
-GCP price list. On GKE, each container log also goes to Cloud Logging.
+used 2.8 cores and 7.1 GiB with 5 simulated users. A free trial project had a limit of 12
+vCPUs across all regions, so 6 leaves room for a node upgrade. The cost is roughly $5 a day.
+Check the current GCP price list. On GKE, each container log also goes to Cloud Logging.
 
 ## The fake GitHub org
 
