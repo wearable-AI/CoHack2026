@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+.vanim-media/
+media/
+!*.mp4
+assets/gcp-icons/
+.DS_Store
