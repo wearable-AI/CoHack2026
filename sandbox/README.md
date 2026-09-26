@@ -120,7 +120,33 @@ So Jaeger shows one order as three unconnected traces, and the order id joins th
 `sandbox/kc.sh` runs `kubectl` against the sandbox only, for example
 `sandbox/kc.sh logs deploy/fraud-detection`.
 
+## Check that it is ready
+
+```sh
+sandbox/ready.sh gke        # or: sandbox/ready.sh local
+```
+
+It checks the pods, the traffic, the checkout traces and their `demo.order.id`, the
+`FOLLOWS_FROM` links from the Kafka consumers, the gap in Jaeger's map, the order logs in
+OpenSearch and in Cloud Logging, the Kafka lag metric, the four incident flags (all `off`),
+and the PHP `quote` service. Its exit code is the number of failed checks. Run it before a
+demo.
+
 ## Incidents for the demo
+
+### The main one: the PHP service goes down
+
+```sh
+sandbox/kc.sh scale deploy/quote --replicas=0     # break it
+sandbox/kc.sh scale deploy/quote --replicas=1     # repair it
+```
+
+Tested on the local cluster for 75 seconds: 2 of 2 checkouts failed with HTTP 500, and the
+other 77 requests worked. `checkout` reports "shipping quote failure: failed POST to shipping
+service: expected 200, got 500". It blames `shipping`, but the trace shows that `shipping`
+could not connect to `quote`, which had no pods. The first error points at the wrong service.
+
+### Flags
 
 Open `http://localhost:8080/feature` and change a flag:
 
