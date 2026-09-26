@@ -1,0 +1,23 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+.venv/
+env/
+
+# Manim Media Output
+media/
+backend/media/
+*.mp4
+*.png
+
+# Node / Frontend
+node_modules/
+.next/
+dist/
+build/
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
