@@ -62,8 +62,8 @@ single screen shows the whole order.
 2. "A new developer asks: how does an order work? Today's tools show a broken picture." Show
    Jaeger, where the order stops at Kafka.
 3. "Our product shows the whole journey." Show the animation.
-4. "Now we break something on purpose." Turn on the `paymentFailure` flag. "The product shows
-   what broke, and where."
+4. "Now we break something on purpose." Stop the PHP `quote` service. Checkout fails, and its
+   error blames `shipping`. "The product follows the chain to the PHP service that is down."
 
 ## Status
 
@@ -72,6 +72,7 @@ single screen shows the whole order.
 | Fake company in Google Cloud | done, running |
 | Animation engine with 3 example clips (`vizln/`) | done |
 | Proof of the problem: one order split across 3 places | done, measured |
+| Readiness check for the fake company (`sandbox/ready.sh`) | done, all checks pass |
 | Collect and join (the stitcher) | not yet |
 | An animation of a real order | not yet |
 | The connection to the AI assistant | not yet |
