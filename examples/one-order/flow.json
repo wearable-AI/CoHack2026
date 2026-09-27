@@ -9,6 +9,7 @@
    "short": "a4013e83",
    "role": "checkout",
    "spans": 118,
+   "order_spans": 55,
    "services": [
     "cart",
     "checkout",
@@ -22,142 +23,144 @@
     "quote",
     "shipping"
    ],
-   "order_ms": 0.0,
+   "order_ms": 3.9,
    "root_op": "GET",
-   "root_opened_ms": 0.0
+   "root_opened_ms": -100.6
   },
   {
    "id": "d02a3f06dec1b9b456e5ce05f392fd13",
    "short": "d02a3f06",
    "role": "accounting",
    "spans": 3,
+   "order_spans": 3,
    "services": [
     "accounting"
    ],
-   "order_ms": 178.1,
+   "order_ms": 77.5,
    "root_op": "order-consumed",
-   "root_opened_ms": -17426.3
+   "root_opened_ms": -17526.9
   },
   {
    "id": "0138fcfe9e569ac680e9d74c9d008348",
    "short": "0138fcfe",
    "role": "fraud-detection",
    "spans": 2,
+   "order_spans": 2,
    "services": [
     "fraud-detection"
    ],
-   "order_ms": 178.7,
+   "order_ms": 77.8,
    "root_op": "receive orders",
-   "root_opened_ms": 128.4
+   "root_opened_ms": 27.8
   }
  ],
  "nodes": [
   {
    "id": "frontend-proxy",
-   "first_ms": 0.7,
+   "first_ms": 1.1,
    "kind": "service",
    "language": "cpp",
    "depth": 0
   },
   {
    "id": "frontend",
-   "first_ms": 0.7,
+   "first_ms": 1.1,
    "kind": "service",
    "language": "nodejs",
    "depth": 1
   },
   {
    "id": "checkout",
-   "first_ms": 104.5,
+   "first_ms": 3.9,
    "kind": "service",
    "language": "go",
    "depth": 2
   },
   {
-   "id": "product-catalog",
-   "first_ms": 3.9,
-   "kind": "service",
-   "language": "go",
-   "depth": 3
-  },
-  {
    "id": "cart",
-   "first_ms": 28.0,
+   "first_ms": 6.0,
    "kind": "service",
    "language": "dotnet",
    "depth": 3
   },
   {
+   "id": "product-catalog",
+   "first_ms": 10.1,
+   "kind": "service",
+   "language": "go",
+   "depth": 3
+  },
+  {
    "id": "currency",
-   "first_ms": 119.8,
+   "first_ms": 19.2,
    "kind": "service",
    "language": "cpp",
    "depth": 3
   },
   {
    "id": "shipping",
-   "first_ms": 134.8,
+   "first_ms": 34.2,
    "kind": "service",
    "language": "rust",
    "depth": 3
   },
   {
    "id": "payment",
-   "first_ms": 148.7,
+   "first_ms": 48.1,
    "kind": "service",
    "language": "nodejs",
    "depth": 3
   },
   {
    "id": "email",
-   "first_ms": 162.8,
+   "first_ms": 62.2,
    "kind": "service",
    "language": "ruby",
    "depth": 3
   },
   {
    "id": "kafka \u00b7 orders",
-   "first_ms": 175.5,
+   "first_ms": 74.9,
    "kind": "queue",
    "depth": 3
   },
   {
    "id": "redis \u00b7 valkey-cart",
-   "first_ms": 28.1,
+   "first_ms": 6.2,
    "kind": "store",
    "depth": 4
   },
   {
    "id": "quote",
-   "first_ms": 140.0,
+   "first_ms": 39.4,
    "kind": "service",
    "language": "php",
    "depth": 4
   },
   {
    "id": "flagd",
-   "first_ms": 156.1,
+   "first_ms": 55.5,
    "kind": "service",
    "language": "go",
    "depth": 4
   },
   {
    "id": "accounting",
-   "first_ms": 178.1,
+   "first_ms": 77.5,
    "kind": "service",
    "language": "dotnet",
    "depth": 4
   },
   {
    "id": "fraud-detection",
-   "first_ms": 178.7,
+   "first_ms": 77.8,
    "kind": "service",
    "language": "java",
    "depth": 4
   },
   {
    "id": "postgresql \u00b7 astronomy-db",
-   "first_ms": 5.8,
+   "first_ms": 13.6,
    "kind": "store",
    "depth": 5
   }
@@ -167,85 +170,10 @@
    "from": "frontend-proxy",
    "to": "frontend",
    "kind": "call",
-   "count": 7,
-   "first_ms": 0.7,
+   "count": 1,
+   "first_ms": 1.1,
    "hops": [
-    "h01",
-    "h04",
-    "h11",
-    "h14",
-    "h21",
-    "h24",
-    "h31"
-   ]
-  },
-  {
-   "from": "frontend",
-   "to": "product-catalog",
-   "kind": "call",
-   "count": 5,
-   "first_ms": 3.9,
-   "hops": [
-    "h02",
-    "h12",
-    "h22",
-    "h55",
-    "h56"
-   ]
-  },
-  {
-   "from": "product-catalog",
-   "to": "postgresql \u00b7 astronomy-db",
-   "kind": "store",
-   "count": 7,
-   "first_ms": 5.8,
-   "hops": [
-    "h03",
-    "h13",
-    "h23",
-    "h36",
-    "h39",
-    "h57",
-    "h58"
-   ]
-  },
-  {
-   "from": "frontend",
-   "to": "cart",
-   "kind": "call",
-   "count": 6,
-   "first_ms": 28.0,
-   "hops": [
-    "h05",
-    "h09",
-    "h15",
-    "h19",
-    "h25",
-    "h29"
-   ]
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "count": 15,
-   "first_ms": 28.1,
-   "hops": [
-    "h06",
-    "h07",
-    "h08",
-    "h10",
-    "h16",
-    "h17",
-    "h18",
-    "h20",
-    "h26",
-    "h27",
-    "h28",
-    "h30",
-    "h34",
-    "h48",
-    "h49"
+    "h01"
    ]
   },
   {
@@ -253,9 +181,9 @@
    "to": "checkout",
    "kind": "call",
    "count": 1,
-   "first_ms": 104.5,
+   "first_ms": 3.9,
    "hops": [
-    "h32"
+    "h02"
    ]
   },
   {
@@ -263,10 +191,22 @@
    "to": "cart",
    "kind": "call",
    "count": 2,
-   "first_ms": 106.6,
+   "first_ms": 6.0,
    "hops": [
-    "h33",
-    "h46"
+    "h03",
+    "h16"
+   ]
+  },
+  {
+   "from": "cart",
+   "to": "redis \u00b7 valkey-cart",
+   "kind": "store",
+   "count": 3,
+   "first_ms": 6.2,
+   "hops": [
+    "h04",
+    "h18",
+    "h19"
    ]
   },
   {
@@ -274,10 +214,23 @@
    "to": "product-catalog",
    "kind": "call",
    "count": 2,
-   "first_ms": 110.7,
+   "first_ms": 10.1,
    "hops": [
-    "h35",
-    "h38"
+    "h05",
+    "h08"
+   ]
+  },
+  {
+   "from": "product-catalog",
+   "to": "postgresql \u00b7 astronomy-db",
+   "kind": "store",
+   "count": 4,
+   "first_ms": 13.6,
+   "hops": [
+    "h06",
+    "h09",
+    "h27",
+    "h28"
    ]
   },
   {
@@ -285,11 +238,11 @@
    "to": "currency",
    "kind": "call",
    "count": 3,
-   "first_ms": 119.8,
+   "first_ms": 19.2,
    "hops": [
-    "h37",
-    "h40",
-    "h43"
+    "h07",
+    "h10",
+    "h13"
    ]
   },
   {
@@ -297,10 +250,10 @@
    "to": "shipping",
    "kind": "call",
    "count": 2,
-   "first_ms": 134.8,
+   "first_ms": 34.2,
    "hops": [
-    "h41",
-    "h45"
+    "h11",
+    "h15"
    ]
   },
   {
@@ -308,9 +261,9 @@
    "to": "quote",
    "kind": "call",
    "count": 1,
-   "first_ms": 140.0,
+   "first_ms": 39.4,
    "hops": [
-    "h42"
+    "h12"
    ]
   },
   {
@@ -318,9 +271,9 @@
    "to": "payment",
    "kind": "call",
    "count": 1,
-   "first_ms": 148.7,
+   "first_ms": 48.1,
    "hops": [
-    "h44"
+    "h14"
    ]
   },
   {
@@ -328,9 +281,9 @@
    "to": "flagd",
    "kind": "call",
    "count": 1,
-   "first_ms": 156.1,
+   "first_ms": 55.5,
    "hops": [
-    "h47"
+    "h17"
    ]
   },
   {
@@ -338,9 +291,9 @@
    "to": "email",
    "kind": "call",
    "count": 1,
-   "first_ms": 162.8,
+   "first_ms": 62.2,
    "hops": [
-    "h50"
+    "h20"
    ]
   },
   {
@@ -348,9 +301,9 @@
    "to": "kafka \u00b7 orders",
    "kind": "publish",
    "count": 1,
-   "first_ms": 175.5,
+   "first_ms": 74.9,
    "hops": [
-    "h51"
+    "h21"
    ]
   },
   {
@@ -358,9 +311,9 @@
    "to": "accounting",
    "kind": "consume",
    "count": 1,
-   "first_ms": 178.1,
+   "first_ms": 77.5,
    "hops": [
-    "h52"
+    "h22"
    ]
   },
   {
@@ -368,9 +321,20 @@
    "to": "fraud-detection",
    "kind": "consume",
    "count": 1,
-   "first_ms": 178.7,
+   "first_ms": 77.8,
    "hops": [
-    "h53"
+    "h23"
+   ]
+  },
+  {
+   "from": "frontend",
+   "to": "product-catalog",
+   "kind": "call",
+   "count": 2,
+   "first_ms": 79.0,
+   "hops": [
+    "h24",
+    "h26"
    ]
   },
   {
@@ -378,9 +342,9 @@
    "to": "postgresql \u00b7 astronomy-db",
    "kind": "store",
    "count": 1,
-   "first_ms": 179.6,
+   "first_ms": 79.0,
    "hops": [
-    "h54"
+    "h25"
    ]
   }
  ],
@@ -389,237 +353,237 @@
    "from": "frontend-proxy",
    "to": "frontend",
    "kind": "call",
-   "op": "GET /api/products/[productId]/index",
-   "t_ms": 0.7,
-   "dur_ms": 7.1,
+   "op": "POST /api/checkout",
+   "t_ms": 1.1,
+   "dur_ms": 86.4,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "dc39e564c438c12d"
+    "span": "58442b1e6ebb1b00"
    },
    "id": "h01"
   },
   {
    "from": "frontend",
-   "to": "product-catalog",
+   "to": "checkout",
    "kind": "call",
-   "op": "oteldemo.ProductCatalogService/GetProduct",
+   "op": "oteldemo.CheckoutService/PlaceOrder",
    "t_ms": 3.9,
-   "dur_ms": 3.5,
+   "dur_ms": 72.0,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "4bb8549928193540"
+    "span": "b0eb2f3e72a02678"
    },
    "id": "h02"
   },
   {
-   "from": "product-catalog",
-   "to": "postgresql \u00b7 astronomy-db",
-   "kind": "store",
-   "op": "astronomy-db",
-   "t_ms": 5.8,
-   "dur_ms": 1.3,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "c12d91c154a2df5d"
-   },
-   "id": "h03"
-  },
-  {
-   "from": "frontend-proxy",
-   "to": "frontend",
-   "kind": "call",
-   "op": "POST /api/cart",
-   "t_ms": 24.7,
-   "dur_ms": 7.5,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "3c0e7af17a43984b"
-   },
-   "id": "h04"
-  },
-  {
-   "from": "frontend",
+   "from": "checkout",
    "to": "cart",
    "kind": "call",
-   "op": "POST /oteldemo.CartService/AddItem",
-   "t_ms": 28.0,
-   "dur_ms": 2.3,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "f8bbd9d28413f651"
-   },
-   "id": "h05"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 28.1,
+   "op": "POST /oteldemo.CartService/GetCart",
+   "t_ms": 6.0,
    "dur_ms": 1.0,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "5e95020ffc0e00db"
+    "span": "fd4376b95e4d6843"
    },
-   "id": "h06"
+   "id": "h03"
   },
   {
    "from": "cart",
    "to": "redis \u00b7 valkey-cart",
    "kind": "store",
    "op": "valkey-cart:6379",
-   "t_ms": 29.1,
-   "dur_ms": 0.8,
+   "t_ms": 6.2,
+   "dur_ms": 0.7,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "91cd8e81e6f0b3f1"
+    "span": "fec421277f380938"
    },
-   "id": "h07"
+   "id": "h04"
   },
   {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 29.9,
-   "dur_ms": 0.3,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "e69049bee425df48"
-   },
-   "id": "h08"
-  },
-  {
-   "from": "frontend",
-   "to": "cart",
-   "kind": "call",
-   "op": "POST /oteldemo.CartService/GetCart",
-   "t_ms": 31.2,
-   "dur_ms": 0.6,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "6612139c237f31e0"
-   },
-   "id": "h09"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 31.3,
-   "dur_ms": 0.5,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "c5559907a4fc993e"
-   },
-   "id": "h10"
-  },
-  {
-   "from": "frontend-proxy",
-   "to": "frontend",
-   "kind": "call",
-   "op": "GET /api/products/[productId]/index",
-   "t_ms": 39.7,
-   "dur_ms": 11.7,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "11e913786640b7d0"
-   },
-   "id": "h11"
-  },
-  {
-   "from": "frontend",
+   "from": "checkout",
    "to": "product-catalog",
    "kind": "call",
    "op": "oteldemo.ProductCatalogService/GetProduct",
-   "t_ms": 44.8,
-   "dur_ms": 5.5,
+   "t_ms": 10.1,
+   "dur_ms": 6.2,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "64579cfc9bcd00e6"
+    "span": "de2adf5d470e008c"
    },
-   "id": "h12"
+   "id": "h05"
   },
   {
    "from": "product-catalog",
    "to": "postgresql \u00b7 astronomy-db",
    "kind": "store",
    "op": "astronomy-db",
-   "t_ms": 48.8,
-   "dur_ms": 1.3,
+   "t_ms": 13.6,
+   "dur_ms": 2.4,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "6694b02733f3a85f"
+    "span": "9ac24f05d6908e03"
    },
-   "id": "h13"
+   "id": "h06"
   },
   {
-   "from": "frontend-proxy",
-   "to": "frontend",
+   "from": "checkout",
+   "to": "currency",
    "kind": "call",
-   "op": "POST /api/cart",
-   "t_ms": 58.7,
-   "dur_ms": 8.8,
+   "op": "oteldemo.CurrencyService/Convert",
+   "t_ms": 19.2,
+   "dur_ms": 0.1,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "35878c100115feb1"
+    "span": "7af29f682ac9b28e"
    },
-   "id": "h14"
+   "id": "h07"
   },
   {
-   "from": "frontend",
-   "to": "cart",
+   "from": "checkout",
+   "to": "product-catalog",
    "kind": "call",
-   "op": "POST /oteldemo.CartService/AddItem",
-   "t_ms": 61.4,
-   "dur_ms": 3.2,
+   "op": "oteldemo.ProductCatalogService/GetProduct",
+   "t_ms": 21.2,
+   "dur_ms": 4.9,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "55647557b12b0ed9"
+    "span": "8b6f4ff24cc29ef1"
    },
-   "id": "h15"
+   "id": "h08"
   },
   {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
+   "from": "product-catalog",
+   "to": "postgresql \u00b7 astronomy-db",
    "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 61.5,
+   "op": "astronomy-db",
+   "t_ms": 23.5,
+   "dur_ms": 2.2,
+   "trace": "a4013e83",
+   "cite": {
+    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+    "span": "c8b9eff66e5de879"
+   },
+   "id": "h09"
+  },
+  {
+   "from": "checkout",
+   "to": "currency",
+   "kind": "call",
+   "op": "oteldemo.CurrencyService/Convert",
+   "t_ms": 28.5,
+   "dur_ms": 0.1,
+   "trace": "a4013e83",
+   "cite": {
+    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+    "span": "017e6c7f47175bfd"
+   },
+   "id": "h10"
+  },
+  {
+   "from": "checkout",
+   "to": "shipping",
+   "kind": "call",
+   "op": "POST /get-quote",
+   "t_ms": 34.2,
+   "dur_ms": 8.3,
+   "trace": "a4013e83",
+   "cite": {
+    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+    "span": "ab43edfe1bd436c1"
+   },
+   "id": "h11"
+  },
+  {
+   "from": "shipping",
+   "to": "quote",
+   "kind": "call",
+   "op": "POST /getquote",
+   "t_ms": 39.4,
    "dur_ms": 0.8,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "5296a90f2e1fccd5"
+    "span": "aef3040d3f568dad"
+   },
+   "id": "h12"
+  },
+  {
+   "from": "checkout",
+   "to": "currency",
+   "kind": "call",
+   "op": "oteldemo.CurrencyService/Convert",
+   "t_ms": 45.1,
+   "dur_ms": 0.1,
+   "trace": "a4013e83",
+   "cite": {
+    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+    "span": "8f22940bc769ace5"
+   },
+   "id": "h13"
+  },
+  {
+   "from": "checkout",
+   "to": "payment",
+   "kind": "call",
+   "op": "oteldemo.PaymentService/Charge",
+   "t_ms": 48.1,
+   "dur_ms": 2.0,
+   "trace": "a4013e83",
+   "cite": {
+    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+    "span": "61599010da86882e"
+   },
+   "id": "h14"
+  },
+  {
+   "from": "checkout",
+   "to": "shipping",
+   "kind": "call",
+   "op": "POST /ship-order",
+   "t_ms": 53.3,
+   "dur_ms": 0.1,
+   "trace": "a4013e83",
+   "cite": {
+    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+    "span": "109153025ddcf7b7"
+   },
+   "id": "h15"
+  },
+  {
+   "from": "checkout",
+   "to": "cart",
+   "kind": "call",
+   "op": "POST /oteldemo.CartService/EmptyCart",
+   "t_ms": 54.5,
+   "dur_ms": 3.9,
+   "trace": "a4013e83",
+   "cite": {
+    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+    "span": "73e676ad09b2955c"
    },
    "id": "h16"
   },
   {
    "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 62.4,
-   "dur_ms": 1.3,
+   "to": "flagd",
+   "kind": "call",
+   "op": "flagd.evaluation.v2.Service/ResolveFloat",
+   "t_ms": 55.5,
+   "dur_ms": 0.2,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "e3c816a6ccf71c9d"
+    "span": "3aeb49c9cb764a91"
    },
    "id": "h17"
   },
@@ -628,665 +592,168 @@
    "to": "redis \u00b7 valkey-cart",
    "kind": "store",
    "op": "valkey-cart:6379",
-   "t_ms": 63.7,
-   "dur_ms": 0.8,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "9091b4f00d6def9c"
-   },
-   "id": "h18"
-  },
-  {
-   "from": "frontend",
-   "to": "cart",
-   "kind": "call",
-   "op": "POST /oteldemo.CartService/GetCart",
-   "t_ms": 66.0,
-   "dur_ms": 0.5,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "5a62527d0221549e"
-   },
-   "id": "h19"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 66.1,
-   "dur_ms": 0.3,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "1590d170214ef6af"
-   },
-   "id": "h20"
-  },
-  {
-   "from": "frontend-proxy",
-   "to": "frontend",
-   "kind": "call",
-   "op": "GET /api/products/[productId]/index",
-   "t_ms": 73.7,
-   "dur_ms": 8.3,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "2324ab647d84e2e8"
-   },
-   "id": "h21"
-  },
-  {
-   "from": "frontend",
-   "to": "product-catalog",
-   "kind": "call",
-   "op": "oteldemo.ProductCatalogService/GetProduct",
-   "t_ms": 76.5,
-   "dur_ms": 4.0,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "b8e3bdf2431d6fd7"
-   },
-   "id": "h22"
-  },
-  {
-   "from": "product-catalog",
-   "to": "postgresql \u00b7 astronomy-db",
-   "kind": "store",
-   "op": "astronomy-db",
-   "t_ms": 78.4,
-   "dur_ms": 1.8,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "d1f249bf1588fd5d"
-   },
-   "id": "h23"
-  },
-  {
-   "from": "frontend-proxy",
-   "to": "frontend",
-   "kind": "call",
-   "op": "POST /api/cart",
-   "t_ms": 87.7,
-   "dur_ms": 6.9,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "4caf68ce6cd41865"
-   },
-   "id": "h24"
-  },
-  {
-   "from": "frontend",
-   "to": "cart",
-   "kind": "call",
-   "op": "POST /oteldemo.CartService/AddItem",
-   "t_ms": 90.8,
-   "dur_ms": 1.8,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "ae1c11f044527f8d"
-   },
-   "id": "h25"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 91.0,
-   "dur_ms": 0.9,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "4d6ad0f0a0ef19b9"
-   },
-   "id": "h26"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 91.9,
-   "dur_ms": 0.4,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "42e9a3b15615de47"
-   },
-   "id": "h27"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 92.3,
-   "dur_ms": 0.3,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "8dc5eadc131dfe4b"
-   },
-   "id": "h28"
-  },
-  {
-   "from": "frontend",
-   "to": "cart",
-   "kind": "call",
-   "op": "POST /oteldemo.CartService/GetCart",
-   "t_ms": 93.6,
-   "dur_ms": 1.1,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "430cefed97220748"
-   },
-   "id": "h29"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 93.7,
-   "dur_ms": 0.9,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "81e071d32508fe19"
-   },
-   "id": "h30"
-  },
-  {
-   "from": "frontend-proxy",
-   "to": "frontend",
-   "kind": "call",
-   "op": "POST /api/checkout",
-   "t_ms": 101.7,
-   "dur_ms": 86.4,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "58442b1e6ebb1b00"
-   },
-   "id": "h31"
-  },
-  {
-   "from": "frontend",
-   "to": "checkout",
-   "kind": "call",
-   "op": "oteldemo.CheckoutService/PlaceOrder",
-   "t_ms": 104.5,
-   "dur_ms": 72.0,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "b0eb2f3e72a02678"
-   },
-   "id": "h32"
-  },
-  {
-   "from": "checkout",
-   "to": "cart",
-   "kind": "call",
-   "op": "POST /oteldemo.CartService/GetCart",
-   "t_ms": 106.6,
-   "dur_ms": 1.0,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "fd4376b95e4d6843"
-   },
-   "id": "h33"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 106.8,
-   "dur_ms": 0.7,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "fec421277f380938"
-   },
-   "id": "h34"
-  },
-  {
-   "from": "checkout",
-   "to": "product-catalog",
-   "kind": "call",
-   "op": "oteldemo.ProductCatalogService/GetProduct",
-   "t_ms": 110.7,
-   "dur_ms": 6.2,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "de2adf5d470e008c"
-   },
-   "id": "h35"
-  },
-  {
-   "from": "product-catalog",
-   "to": "postgresql \u00b7 astronomy-db",
-   "kind": "store",
-   "op": "astronomy-db",
-   "t_ms": 114.2,
-   "dur_ms": 2.4,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "9ac24f05d6908e03"
-   },
-   "id": "h36"
-  },
-  {
-   "from": "checkout",
-   "to": "currency",
-   "kind": "call",
-   "op": "oteldemo.CurrencyService/Convert",
-   "t_ms": 119.8,
-   "dur_ms": 0.1,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "7af29f682ac9b28e"
-   },
-   "id": "h37"
-  },
-  {
-   "from": "checkout",
-   "to": "product-catalog",
-   "kind": "call",
-   "op": "oteldemo.ProductCatalogService/GetProduct",
-   "t_ms": 121.8,
-   "dur_ms": 4.9,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "8b6f4ff24cc29ef1"
-   },
-   "id": "h38"
-  },
-  {
-   "from": "product-catalog",
-   "to": "postgresql \u00b7 astronomy-db",
-   "kind": "store",
-   "op": "astronomy-db",
-   "t_ms": 124.2,
-   "dur_ms": 2.2,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "c8b9eff66e5de879"
-   },
-   "id": "h39"
-  },
-  {
-   "from": "checkout",
-   "to": "currency",
-   "kind": "call",
-   "op": "oteldemo.CurrencyService/Convert",
-   "t_ms": 129.1,
-   "dur_ms": 0.1,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "017e6c7f47175bfd"
-   },
-   "id": "h40"
-  },
-  {
-   "from": "checkout",
-   "to": "shipping",
-   "kind": "call",
-   "op": "POST /get-quote",
-   "t_ms": 134.8,
-   "dur_ms": 8.3,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "ab43edfe1bd436c1"
-   },
-   "id": "h41"
-  },
-  {
-   "from": "shipping",
-   "to": "quote",
-   "kind": "call",
-   "op": "POST /getquote",
-   "t_ms": 140.0,
-   "dur_ms": 0.8,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "aef3040d3f568dad"
-   },
-   "id": "h42"
-  },
-  {
-   "from": "checkout",
-   "to": "currency",
-   "kind": "call",
-   "op": "oteldemo.CurrencyService/Convert",
-   "t_ms": 145.7,
-   "dur_ms": 0.1,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "8f22940bc769ace5"
-   },
-   "id": "h43"
-  },
-  {
-   "from": "checkout",
-   "to": "payment",
-   "kind": "call",
-   "op": "oteldemo.PaymentService/Charge",
-   "t_ms": 148.7,
-   "dur_ms": 2.0,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "61599010da86882e"
-   },
-   "id": "h44"
-  },
-  {
-   "from": "checkout",
-   "to": "shipping",
-   "kind": "call",
-   "op": "POST /ship-order",
-   "t_ms": 153.9,
-   "dur_ms": 0.1,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "109153025ddcf7b7"
-   },
-   "id": "h45"
-  },
-  {
-   "from": "checkout",
-   "to": "cart",
-   "kind": "call",
-   "op": "POST /oteldemo.CartService/EmptyCart",
-   "t_ms": 155.1,
-   "dur_ms": 3.9,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "73e676ad09b2955c"
-   },
-   "id": "h46"
-  },
-  {
-   "from": "cart",
-   "to": "flagd",
-   "kind": "call",
-   "op": "flagd.evaluation.v2.Service/ResolveFloat",
-   "t_ms": 156.1,
-   "dur_ms": 0.2,
-   "trace": "a4013e83",
-   "cite": {
-    "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
-    "span": "3aeb49c9cb764a91"
-   },
-   "id": "h47"
-  },
-  {
-   "from": "cart",
-   "to": "redis \u00b7 valkey-cart",
-   "kind": "store",
-   "op": "valkey-cart:6379",
-   "t_ms": 157.7,
+   "t_ms": 57.1,
    "dur_ms": 0.7,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "35f24dfee06419d1"
    },
-   "id": "h48"
+   "id": "h18"
   },
   {
    "from": "cart",
    "to": "redis \u00b7 valkey-cart",
    "kind": "store",
    "op": "valkey-cart:6379",
-   "t_ms": 158.4,
+   "t_ms": 57.8,
    "dur_ms": 0.4,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "4c42420c31f13457"
    },
-   "id": "h49"
+   "id": "h19"
   },
   {
    "from": "checkout",
    "to": "email",
    "kind": "call",
    "op": "POST /send_order_confirmation",
-   "t_ms": 162.8,
+   "t_ms": 62.2,
    "dur_ms": 11.9,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "f8c07547544c88e0"
    },
-   "id": "h50"
+   "id": "h20"
   },
   {
    "from": "checkout",
    "to": "kafka \u00b7 orders",
    "kind": "publish",
    "op": "publish orders",
-   "t_ms": 175.5,
+   "t_ms": 74.9,
    "dur_ms": 0.5,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "68e95041db533f9e"
    },
-   "id": "h51"
+   "id": "h21"
   },
   {
    "from": "kafka \u00b7 orders",
    "to": "accounting",
    "kind": "consume",
    "op": "receive orders",
-   "t_ms": 178.1,
-   "t_rule": "receive span: the message is in hand when the span ends",
-   "span_start_ms": 130.0,
-   "span_end_ms": 178.1,
+   "t_ms": 77.5,
+   "t_rule": "the receive span ends: the message is in hand",
+   "span_start_ms": 29.3,
+   "span_end_ms": 77.5,
    "dur_ms": 48.2,
    "trace": "d02a3f06",
    "cite": {
     "file": "evidence/14-jaeger-trace-d02a3f06dec1.json",
     "span": "2b70cd6677b1ff1a"
    },
-   "id": "h52"
+   "id": "h22"
   },
   {
    "from": "kafka \u00b7 orders",
    "to": "fraud-detection",
    "kind": "consume",
    "op": "process orders",
-   "t_ms": 178.7,
-   "t_rule": "process span: it starts after the message arrived",
-   "span_start_ms": 178.7,
-   "span_end_ms": 179.5,
+   "t_ms": 77.8,
+   "t_rule": "its parent receive span ends: the message is in hand, before `process orders` starts",
+   "span_start_ms": 78.1,
+   "span_end_ms": 78.8,
    "dur_ms": 0.7,
    "trace": "0138fcfe",
    "cite": {
     "file": "evidence/15-jaeger-trace-0138fcfe9e56.json",
     "span": "4d7c044e5b8932da"
    },
-   "id": "h53"
-  },
-  {
-   "from": "accounting",
-   "to": "postgresql \u00b7 astronomy-db",
-   "kind": "store",
-   "op": "astronomy_db",
-   "t_ms": 179.6,
-   "dur_ms": 2.5,
-   "trace": "d02a3f06",
-   "cite": {
-    "file": "evidence/14-jaeger-trace-d02a3f06dec1.json",
-    "span": "8ddba1cd7427b7f0"
-   },
-   "id": "h54"
+   "id": "h23"
   },
   {
    "from": "frontend",
    "to": "product-catalog",
    "kind": "call",
    "op": "oteldemo.ProductCatalogService/GetProduct",
-   "t_ms": 179.7,
+   "t_ms": 79.0,
    "dur_ms": 5.2,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "0b646c400a505c2a"
    },
-   "id": "h55"
+   "id": "h24"
+  },
+  {
+   "from": "accounting",
+   "to": "postgresql \u00b7 astronomy-db",
+   "kind": "store",
+   "op": "astronomy_db",
+   "t_ms": 79.0,
+   "dur_ms": 2.5,
+   "trace": "d02a3f06",
+   "cite": {
+    "file": "evidence/14-jaeger-trace-d02a3f06dec1.json",
+    "span": "8ddba1cd7427b7f0"
+   },
+   "id": "h25"
   },
   {
    "from": "frontend",
    "to": "product-catalog",
    "kind": "call",
    "op": "oteldemo.ProductCatalogService/GetProduct",
-   "t_ms": 180.0,
+   "t_ms": 79.4,
    "dur_ms": 6.1,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "0850fe6d09419908"
    },
-   "id": "h56"
+   "id": "h26"
   },
   {
    "from": "product-catalog",
    "to": "postgresql \u00b7 astronomy-db",
    "kind": "store",
    "op": "astronomy-db",
-   "t_ms": 183.1,
+   "t_ms": 82.4,
    "dur_ms": 1.4,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "2f23c765e05f86d7"
    },
-   "id": "h57"
+   "id": "h27"
   },
   {
    "from": "product-catalog",
    "to": "postgresql \u00b7 astronomy-db",
    "kind": "store",
    "op": "astronomy-db",
-   "t_ms": 183.6,
+   "t_ms": 83.0,
    "dur_ms": 2.3,
    "trace": "a4013e83",
    "cite": {
     "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
     "span": "928ca3fa545c9c77"
    },
-   "id": "h58"
+   "id": "h28"
   }
  ],
  "logs": [
   {
    "store": "opensearch",
-   "service": "currency",
-   "t_ms": -1790479270535.3,
-   "text": "conversion successful",
-   "trace": "a4013e83",
-   "names_order": false,
-   "order_field": null,
-   "cite": {
-    "file": "evidence/17-opensearch-by-trace.json",
-    "id": "jIbh4KAByOkVm0nKhD85"
-   }
-  },
-  {
-   "store": "opensearch",
-   "service": "currency",
-   "t_ms": -1790479270535.3,
-   "text": "conversion successful",
-   "trace": "a4013e83",
-   "names_order": false,
-   "order_field": null,
-   "cite": {
-    "file": "evidence/17-opensearch-by-trace.json",
-    "id": "jYbh4KAByOkVm0nKhD85"
-   }
-  },
-  {
-   "store": "opensearch",
-   "service": "currency",
-   "t_ms": -1790479270535.3,
-   "text": "conversion successful",
-   "trace": "a4013e83",
-   "names_order": false,
-   "order_field": null,
-   "cite": {
-    "file": "evidence/17-opensearch-by-trace.json",
-    "id": "jobh4KAByOkVm0nKhD85"
-   }
-  },
-  {
-   "store": "opensearch",
-   "service": "shipping",
-   "t_ms": -1790479270535.3,
-   "text": "Requesting quote",
-   "trace": "a4013e83",
-   "names_order": false,
-   "order_field": null,
-   "cite": {
-    "file": "evidence/17-opensearch-by-trace.json",
-    "id": "kIbh4KAByOkVm0nKhT-x"
-   }
-  },
-  {
-   "store": "opensearch",
-   "service": "shipping",
-   "t_ms": -1790479270535.3,
-   "text": "Sending Quote",
-   "trace": "a4013e83",
-   "names_order": false,
-   "order_field": null,
-   "cite": {
-    "file": "evidence/17-opensearch-by-trace.json",
-    "id": "kYbh4KAByOkVm0nKhT-x"
-   }
-  },
-  {
-   "store": "opensearch",
-   "service": "shipping",
-   "t_ms": -1790479270535.3,
-   "text": "Tracking ID Created",
-   "trace": "a4013e83",
-   "names_order": false,
-   "order_field": null,
-   "cite": {
-    "file": "evidence/17-opensearch-by-trace.json",
-    "id": "kobh4KAByOkVm0nKhT-x"
-   }
-  },
-  {
-   "store": "opensearch",
    "service": "frontend-proxy",
-   "t_ms": 0.0,
+   "t_ms": -100.6,
+   "time_field": "@timestamp",
    "text": "[2026-09-27T03:21:10.535Z] \"GET /api/products/9SIQT8TOJO HTTP/1.1\" 200 - via_upstream - \"-\" 0 778 9 8 \"-\" \"python-requests/2.34.2\" \"eb9a7b5c-01cd-96d4-9522-7b7f",
    "trace": "a4013e83",
    "names_order": false,
@@ -1299,7 +766,8 @@
   {
    "store": "opensearch",
    "service": "product-catalog",
-   "t_ms": 7.3,
+   "t_ms": -93.4,
+   "time_field": "@timestamp",
    "text": "Product Found",
    "trace": "a4013e83",
    "names_order": false,
@@ -1312,7 +780,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 7.7,
+   "t_ms": -92.9,
+   "time_field": "@timestamp",
    "text": "API request completed",
    "trace": "a4013e83",
    "names_order": false,
@@ -1325,7 +794,8 @@
   {
    "store": "opensearch",
    "service": "frontend-proxy",
-   "t_ms": 23.6,
+   "t_ms": -77.0,
+   "time_field": "@timestamp",
    "text": "[2026-09-27T03:21:10.558Z] \"POST /api/cart HTTP/1.1\" 200 - via_upstream - \"-\" 102 99 9 8 \"-\" \"python-requests/2.34.2\" \"2cd956ec-9d82-9385-8642-859305b775e9\" \"fr",
    "trace": "a4013e83",
    "names_order": false,
@@ -1338,7 +808,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 28.1,
+   "t_ms": -72.5,
+   "time_field": "@timestamp",
    "text": "AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1351,7 +822,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 31.3,
+   "t_ms": -69.3,
+   "time_field": "@timestamp",
    "text": "GetCartAsync called with userId={userId}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1364,7 +836,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 31.7,
+   "t_ms": -68.9,
+   "time_field": "@timestamp",
    "text": "API request completed",
    "trace": "a4013e83",
    "names_order": false,
@@ -1377,7 +850,8 @@
   {
    "store": "opensearch",
    "service": "frontend-proxy",
-   "t_ms": 39.5,
+   "t_ms": -61.1,
+   "time_field": "@timestamp",
    "text": "[2026-09-27T03:21:10.574Z] \"GET /api/products/9SIQT8TOJO HTTP/1.1\" 200 - via_upstream - \"-\" 0 778 13 12 \"-\" \"python-requests/2.34.2\" \"b29a5397-c841-9ea3-97b4-c3",
    "trace": "a4013e83",
    "names_order": false,
@@ -1390,7 +864,8 @@
   {
    "store": "opensearch",
    "service": "product-catalog",
-   "t_ms": 50.3,
+   "t_ms": -50.3,
+   "time_field": "@timestamp",
    "text": "Product Found",
    "trace": "a4013e83",
    "names_order": false,
@@ -1403,7 +878,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 51.7,
+   "t_ms": -48.9,
+   "time_field": "@timestamp",
    "text": "API request completed",
    "trace": "a4013e83",
    "names_order": false,
@@ -1416,7 +892,8 @@
   {
    "store": "opensearch",
    "service": "frontend-proxy",
-   "t_ms": 57.8,
+   "t_ms": -42.8,
+   "time_field": "@timestamp",
    "text": "[2026-09-27T03:21:10.593Z] \"POST /api/cart HTTP/1.1\" 200 - via_upstream - \"-\" 102 99 10 9 \"-\" \"python-requests/2.34.2\" \"ac61067b-00bc-9cba-b0cd-a5dd9e1ec57e\" \"f",
    "trace": "a4013e83",
    "names_order": false,
@@ -1429,7 +906,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 61.5,
+   "t_ms": -39.1,
+   "time_field": "@timestamp",
    "text": "AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1442,7 +920,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 66.1,
+   "t_ms": -34.5,
+   "time_field": "@timestamp",
    "text": "GetCartAsync called with userId={userId}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1455,7 +934,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 66.7,
+   "t_ms": -33.9,
+   "time_field": "@timestamp",
    "text": "API request completed",
    "trace": "a4013e83",
    "names_order": false,
@@ -1468,7 +948,8 @@
   {
    "store": "opensearch",
    "service": "frontend-proxy",
-   "t_ms": 73.0,
+   "t_ms": -27.6,
+   "time_field": "@timestamp",
    "text": "[2026-09-27T03:21:10.608Z] \"GET /api/products/LS4PSXUNUM HTTP/1.1\" 200 - via_upstream - \"-\" 0 533 9 8 \"-\" \"python-requests/2.34.2\" \"32a61bff-36a3-9854-830f-329d",
    "trace": "a4013e83",
    "names_order": false,
@@ -1481,7 +962,8 @@
   {
    "store": "opensearch",
    "service": "product-catalog",
-   "t_ms": 80.4,
+   "t_ms": -20.2,
+   "time_field": "@timestamp",
    "text": "Product Found",
    "trace": "a4013e83",
    "names_order": false,
@@ -1494,7 +976,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 81.7,
+   "t_ms": -18.9,
+   "time_field": "@timestamp",
    "text": "API request completed",
    "trace": "a4013e83",
    "names_order": false,
@@ -1507,7 +990,8 @@
   {
    "store": "opensearch",
    "service": "frontend-proxy",
-   "t_ms": 87.1,
+   "t_ms": -13.6,
+   "time_field": "@timestamp",
    "text": "[2026-09-27T03:21:10.622Z] \"POST /api/cart HTTP/1.1\" 200 - via_upstream - \"-\" 102 139 8 8 \"-\" \"python-requests/2.34.2\" \"cb643501-ed01-96cc-8038-372249a45f91\" \"f",
    "trace": "a4013e83",
    "names_order": false,
@@ -1520,7 +1004,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 91.0,
+   "t_ms": -9.7,
+   "time_field": "@timestamp",
    "text": "AddItemAsync called with userId={userId}, productId={productId}, quantity={quantity}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1533,7 +1018,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 93.7,
+   "t_ms": -6.9,
+   "time_field": "@timestamp",
    "text": "GetCartAsync called with userId={userId}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1546,7 +1032,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 94.7,
+   "t_ms": -5.9,
+   "time_field": "@timestamp",
    "text": "API request completed",
    "trace": "a4013e83",
    "names_order": false,
@@ -1559,7 +1046,8 @@
   {
    "store": "opensearch",
    "service": "frontend-proxy",
-   "t_ms": 100.6,
+   "t_ms": 0.0,
+   "time_field": "@timestamp",
    "text": "[2026-09-27T03:21:10.635Z] \"POST /api/checkout HTTP/1.1\" 200 - via_upstream - \"-\" 382 970 88 87 \"-\" \"python-requests/2.34.2\" \"2918b966-e544-9e75-9378-6eccdeca94",
    "trace": "a4013e83",
    "names_order": false,
@@ -1572,7 +1060,8 @@
   {
    "store": "opensearch",
    "service": "checkout",
-   "t_ms": 104.8,
+   "t_ms": 4.1,
+   "time_field": "@timestamp",
    "text": "[PlaceOrder]",
    "trace": "a4013e83",
    "names_order": false,
@@ -1585,7 +1074,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 106.8,
+   "t_ms": 6.2,
+   "time_field": "@timestamp",
    "text": "GetCartAsync called with userId={userId}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1598,7 +1088,8 @@
   {
    "store": "opensearch",
    "service": "product-catalog",
-   "t_ms": 116.8,
+   "t_ms": 16.1,
+   "time_field": "@timestamp",
    "text": "Product Found",
    "trace": "a4013e83",
    "names_order": false,
@@ -1611,7 +1102,8 @@
   {
    "store": "opensearch",
    "service": "product-catalog",
-   "t_ms": 126.6,
+   "t_ms": 26.0,
+   "time_field": "@timestamp",
    "text": "Product Found",
    "trace": "a4013e83",
    "names_order": false,
@@ -1624,7 +1116,8 @@
   {
    "store": "opensearch",
    "service": "quote",
-   "t_ms": 140.6,
+   "t_ms": 39.9,
+   "time_field": "@timestamp",
    "text": "Calculated quote",
    "trace": "a4013e83",
    "names_order": false,
@@ -1637,7 +1130,8 @@
   {
    "store": "opensearch",
    "service": "payment",
-   "t_ms": 148.7,
+   "t_ms": 48.1,
+   "time_field": "@timestamp",
    "text": "Charge request received.",
    "trace": "a4013e83",
    "names_order": false,
@@ -1650,7 +1144,8 @@
   {
    "store": "opensearch",
    "service": "payment",
-   "t_ms": 150.7,
+   "t_ms": 50.1,
+   "time_field": "@timestamp",
    "text": "Transaction complete.",
    "trace": "a4013e83",
    "names_order": false,
@@ -1663,7 +1158,8 @@
   {
    "store": "opensearch",
    "service": "checkout",
-   "t_ms": 153.0,
+   "t_ms": 52.3,
+   "time_field": "@timestamp",
    "text": "payment went through",
    "trace": "a4013e83",
    "names_order": false,
@@ -1676,7 +1172,8 @@
   {
    "store": "opensearch",
    "service": "cart",
-   "t_ms": 157.7,
+   "t_ms": 57.1,
+   "time_field": "@timestamp",
    "text": "EmptyCartAsync called with userId={userId}",
    "trace": "a4013e83",
    "names_order": false,
@@ -1689,7 +1186,8 @@
   {
    "store": "opensearch",
    "service": "checkout",
-   "t_ms": 159.5,
+   "t_ms": 58.9,
+   "time_field": "@timestamp",
    "text": "order placed",
    "trace": "a4013e83",
    "names_order": true,
@@ -1702,7 +1200,8 @@
   {
    "store": "opensearch",
    "service": "email",
-   "t_ms": 174.0,
+   "t_ms": 73.3,
+   "time_field": "@timestamp",
    "text": "Order confirmation email sent",
    "trace": "a4013e83",
    "names_order": true,
@@ -1715,7 +1214,7 @@
   {
    "store": "cloud-logging",
    "service": "email",
-   "t_ms": 174.3,
+   "t_ms": 73.7,
    "text": "Order confirmation email sent for order 7c8c01c4-ba22-11f1-903b-b295684fc89c",
    "trace": null,
    "names_order": true,
@@ -1728,7 +1227,8 @@
   {
    "store": "opensearch",
    "service": "accounting",
-   "t_ms": 178.2,
+   "t_ms": 77.5,
+   "time_field": "@timestamp",
    "text": "Order details: {@OrderResult}.",
    "trace": "d02a3f06",
    "names_order": true,
@@ -1741,7 +1241,8 @@
   {
    "store": "opensearch",
    "service": "fraud-detection",
-   "t_ms": 179.0,
+   "t_ms": 78.4,
+   "time_field": "@timestamp",
    "text": "Consumed record with orderId: 7c8c01c4-ba22-11f1-903b-b295684fc89c, and updated total count to: 1133",
    "trace": "0138fcfe",
    "names_order": true,
@@ -1754,7 +1255,7 @@
   {
    "store": "cloud-logging",
    "service": "accounting",
-   "t_ms": 179.6,
+   "t_ms": 79.0,
    "text": "Order details: { \"orderId\": \"7c8c01c4-ba22-11f1-903b-b295684fc89c\", \"shippingTrackingId\": \"5d204c13-343a-4c58-9cff-ccf6a255dc08\", \"shippingCost\": { \"currencyCod",
    "trace": null,
    "names_order": true,
@@ -1767,7 +1268,7 @@
   {
    "store": "cloud-logging",
    "service": "fraud-detection",
-   "t_ms": 179.6,
+   "t_ms": 79.0,
    "text": "2026-09-27 03:21:10 - fraud-detection - Consumed record with orderId: 7c8c01c4-ba22-11f1-903b-b295684fc89c, and updated total count to: 1133 trace_id=0138fcfe9e",
    "trace": null,
    "names_order": true,
@@ -1780,7 +1281,8 @@
   {
    "store": "opensearch",
    "service": "product-catalog",
-   "t_ms": 184.7,
+   "t_ms": 84.1,
+   "time_field": "@timestamp",
    "text": "Product Found",
    "trace": "a4013e83",
    "names_order": false,
@@ -1793,7 +1295,8 @@
   {
    "store": "opensearch",
    "service": "product-catalog",
-   "t_ms": 186.1,
+   "t_ms": 85.4,
+   "time_field": "@timestamp",
    "text": "Product Found",
    "trace": "a4013e83",
    "names_order": false,
@@ -1806,7 +1309,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 186.7,
+   "t_ms": 86.1,
+   "time_field": "@timestamp",
    "text": "Order placed successfully",
    "trace": "a4013e83",
    "names_order": true,
@@ -1819,7 +1323,8 @@
   {
    "store": "opensearch",
    "service": "frontend",
-   "t_ms": 186.7,
+   "t_ms": 86.1,
+   "time_field": "@timestamp",
    "text": "API request completed",
    "trace": "a4013e83",
    "names_order": false,
@@ -1827,6 +1332,90 @@
    "cite": {
     "file": "evidence/17-opensearch-by-trace.json",
     "id": "o4bh4KAByOkVm0nKhj-K"
+   }
+  },
+  {
+   "store": "opensearch",
+   "service": "currency",
+   "t_ms": 332.9,
+   "time_field": "observedTimestamp",
+   "text": "conversion successful",
+   "trace": "a4013e83",
+   "names_order": false,
+   "order_field": null,
+   "cite": {
+    "file": "evidence/17-opensearch-by-trace.json",
+    "id": "jIbh4KAByOkVm0nKhD85"
+   }
+  },
+  {
+   "store": "opensearch",
+   "service": "currency",
+   "t_ms": 333.0,
+   "time_field": "observedTimestamp",
+   "text": "conversion successful",
+   "trace": "a4013e83",
+   "names_order": false,
+   "order_field": null,
+   "cite": {
+    "file": "evidence/17-opensearch-by-trace.json",
+    "id": "jYbh4KAByOkVm0nKhD85"
+   }
+  },
+  {
+   "store": "opensearch",
+   "service": "currency",
+   "t_ms": 333.1,
+   "time_field": "observedTimestamp",
+   "text": "conversion successful",
+   "trace": "a4013e83",
+   "names_order": false,
+   "order_field": null,
+   "cite": {
+    "file": "evidence/17-opensearch-by-trace.json",
+    "id": "jobh4KAByOkVm0nKhD85"
+   }
+  },
+  {
+   "store": "opensearch",
+   "service": "shipping",
+   "t_ms": 708.3,
+   "time_field": "observedTimestamp",
+   "text": "Requesting quote",
+   "trace": "a4013e83",
+   "names_order": false,
+   "order_field": null,
+   "cite": {
+    "file": "evidence/17-opensearch-by-trace.json",
+    "id": "kIbh4KAByOkVm0nKhT-x"
+   }
+  },
+  {
+   "store": "opensearch",
+   "service": "shipping",
+   "t_ms": 708.4,
+   "time_field": "observedTimestamp",
+   "text": "Sending Quote",
+   "trace": "a4013e83",
+   "names_order": false,
+   "order_field": null,
+   "cite": {
+    "file": "evidence/17-opensearch-by-trace.json",
+    "id": "kYbh4KAByOkVm0nKhT-x"
+   }
+  },
+  {
+   "store": "opensearch",
+   "service": "shipping",
+   "t_ms": 708.5,
+   "time_field": "observedTimestamp",
+   "text": "Tracking ID Created",
+   "trace": "a4013e83",
+   "names_order": false,
+   "order_field": null,
+   "cite": {
+    "file": "evidence/17-opensearch-by-trace.json",
+    "id": "kobh4KAByOkVm0nKhT-x"
    }
   }
  ],
@@ -1854,14 +1443,23 @@
    ]
   }
  },
+ "scope": {
+  "rule": "the one top-level request in the checkout trace whose subtree holds demo.order.id",
+  "top_level_requests": 7,
+  "order_request_spans": 55,
+  "other_request_spans": 63,
+  "order_request_op": "frontend-proxy POST",
+  "order_request_offset_ms": 100.6
+ },
  "facts": {
   "spans_total": 123,
-  "hops": 58,
-  "spans_inside_one_service": 65,
-  "publish_ms": 175.5,
+  "spans_in_scope": 60,
+  "hops": 28,
+  "spans_inside_one_service": 32,
+  "publish_ms": 74.9,
   "consume_ms": {
-   "accounting": 178.1,
-   "fraud-detection": 178.7
+   "accounting": 77.5,
+   "fraud-detection": 77.8
   },
   "checkout_ms": 72.0,
   "queue": "kafka \u00b7 orders",
@@ -1872,9 +1470,15 @@
    "accounting": 1132,
    "fraud-detection": 1132
   },
-  "joins_passed": 11
+  "joins_passed": 14
  },
  "joins": [
+  {
+   "what": "exactly one top-level request in the trace holds the order id",
+   "ok": true,
+   "got": "1 of 7 top-level requests",
+   "evidence": "evidence/02-jaeger-trace-a4013e836e1b.json"
+  },
   {
    "what": "the checkout trace carries the order id",
    "ok": true,
@@ -1896,7 +1500,7 @@
   {
    "what": "accounting has the order only after checkout published it",
    "ok": true,
-   "got": "accounting at 178.1 ms, publish at 175.5 ms",
+   "got": "accounting at 77.5 ms, publish at 74.9 ms",
    "evidence": "evidence/14-jaeger-trace-d02a3f06dec1.json"
   },
   {
@@ -1908,7 +1512,7 @@
   {
    "what": "fraud-detection has the order only after checkout published it",
    "ok": true,
-   "got": "fraud-detection at 178.7 ms, publish at 175.5 ms",
+   "got": "fraud-detection at 77.8 ms, publish at 74.9 ms",
    "evidence": "evidence/15-jaeger-trace-0138fcfe9e56.json"
   },
   {
@@ -1920,7 +1524,7 @@
   {
    "what": "each hop comes from a different span",
    "ok": true,
-   "got": "58 hops, 58 distinct spans",
+   "got": "28 hops, 28 distinct spans",
    "evidence": "all traces"
   },
   {
@@ -1939,6 +1543,18 @@
    "what": "every OpenSearch line with a trace id belongs to one of the order's traces",
    "ok": true,
    "got": "45 lines, trace ids in ['0138fcfe', 'a4013e83', 'd02a3f06']",
+   "evidence": "opensearch files"
+  },
+  {
+   "what": "the order id also reaches the accounting trace: a log line names the order and carries that trace id",
+   "ok": true,
+   "got": "1 line(s), store opensearch",
+   "evidence": "opensearch files"
+  },
+  {
+   "what": "the order id also reaches the fraud-detection trace: a log line names the order and carries that trace id",
+   "ok": true,
+   "got": "1 line(s), store opensearch",
    "evidence": "opensearch files"
   }
  ]

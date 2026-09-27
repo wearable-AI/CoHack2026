@@ -51,7 +51,27 @@ def main():
     tid = cap["checkout_trace"]
     order_of = {x["trace"]: x["service"] for x in cap["linked_traces"]}
     ckt, ckt_file = traces[tid]
-    t0 = min(s["startTime"] for s in ckt["spans"])
+
+    # ---- scope: a shopper's session can share one trace across many requests.
+    # The order is the one top-level request whose subtree holds the order id.
+    ck = {s["spanID"]: s for s in ckt["spans"]}
+
+    def up(s):
+        while True:
+            p = next((r["spanID"] for r in s.get("references", []) if r["refType"] == "CHILD_OF"), None)
+            if p not in ck:
+                return s
+            s = ck[p]
+
+    tagged = [s for s in ckt["spans"] if tag(s, "demo.order.id") == order]
+    tops = {up(s)["spanID"] for s in ckt["spans"]}
+    holders = {up(s)["spanID"] for s in tagged}
+    check("exactly one top-level request in the trace holds the order id", len(holders) == 1,
+          f"{len(holders)} of {len(tops)} top-level requests", ckt_file)
+    req = ck[next(iter(holders))]
+    in_order = {s["spanID"] for s in ckt["spans"] if up(s)["spanID"] == req["spanID"]}
+    order_span = min(tagged, key=lambda s: s["startTime"])
+    t0 = req["startTime"]
 
     def ms(us):
         return round((us - t0) / 1000, 1)
@@ -70,15 +90,17 @@ def main():
           any(tag(s, "demo.order.id") == order for s in ckt["spans"]),
           f"demo.order.id={order} on trace {short(tid)}", ckt_file)
 
-    producers = [s for s in spans.values() if s["trace"] == tid and tag(s, "span.kind") == "producer"]
+    producers = [s for s in spans.values() if s["spanID"] in in_order and tag(s, "span.kind") == "producer"]
     check("checkout published the order to a queue", len(producers) == 1,
           f"{len(producers)} producer span(s)", ckt_file)
     pub = producers[0]
     queue = f"{tag(pub, 'messaging.system')} · {tag(pub, 'messaging.destination.name')}"
 
-    # ---- hops: every call that crosses a boundary ----------------------------
+    # ---- hops: every call that crosses a boundary, inside the order's scope ----
     hops = []
     for s in spans.values():
+        if s["trace"] == tid and s["spanID"] not in in_order:
+            continue
         parent = next((spans.get(r["spanID"]) for r in s.get("references", [])
                        if r["refType"] == "CHILD_OF"), None)
         cite = {"file": s["file"], "span": s["spanID"]}
@@ -107,13 +129,19 @@ def main():
               f"FOLLOWS_FROM {short(r['spanID']) if r else 'none'} = publish span {short(pub['spanID'])}", f)
         consumer = spans[s["spanID"]]
         offsets[svc] = tag(consumer, "messaging.kafka.message.offset")
+        # One rule for every consumer: the order is in hand when the receive span ends.
         # A receive span covers the blocking poll, so it can open before the message
-        # exists. The message is in hand when it ends. A process span starts after arrival.
+        # exists. Use the linked span if it is the receive, else its receive ancestor.
+        rcv = consumer
+        while rcv is not None and tag(rcv, "messaging.operation") != "receive":
+            rcv = next((spans.get(r["spanID"]) for r in rcv.get("references", []) if r["refType"] == "CHILD_OF"), None)
         start, end = consumer["startTime"], consumer["startTime"] + consumer["duration"]
-        if tag(consumer, "messaging.operation") == "receive":
-            at, rule = end, "receive span: the message is in hand when the span ends"
+        if rcv is not None:
+            at = rcv["startTime"] + rcv["duration"]
+            rule = ("the receive span ends: the message is in hand" if rcv is consumer else
+                    f"its parent receive span ends: the message is in hand, before `{consumer['operationName']}` starts")
         else:
-            at, rule = start, "process span: it starts after the message arrived"
+            at, rule = start, "no receive span: the linked span starts after the message arrived"
         check(f"{svc} has the order only after checkout published it",
               at >= pub["startTime"], f"{svc} at {ms(at)} ms, publish at {ms(pub['startTime'])} ms", f)
         hops.append({"from": queue, "to": svc, "kind": "consume", "op": consumer["operationName"],
@@ -144,8 +172,12 @@ def main():
                 body = str(src.get("body", ""))
                 field = "body" if order in body else next(
                     (f"attributes.{k}" for k, v in attrs.items() if order in json.dumps(v)), None)
+                # some SDKs send no event time, and OpenSearch then stores 1970-01-01
+                when, time_field = src["@timestamp"], "@timestamp"
+                if when.startswith("1970-01-01") and src.get("observedTimestamp"):
+                    when, time_field = src["observedTimestamp"], "observedTimestamp"
                 logs.append({"store": "opensearch", "service": res.get("service.name") or res.get("service", {}).get("name"),
-                             "t_ms": ms(iso_us(src["@timestamp"])), "text": body[:160],
+                             "t_ms": ms(iso_us(when)), "time_field": time_field, "text": body[:160],
                              "trace": short(src.get("traceId") or "") or None,
                              "names_order": field is not None, "order_field": field,
                              "cite": {"file": f, "id": hit["_id"]}})
@@ -172,6 +204,11 @@ def main():
     check("every OpenSearch line with a trace id belongs to one of the order's traces",
           all(any(t.startswith(x["trace"]) for t in ids) for x in by_trace),
           f"{len(by_trace)} lines, trace ids in {sorted(short(t) for t in ids)}", "opensearch files")
+    for trid, svc in order_of.items():
+        mine = [x for x in logs if x["trace"] == short(trid) and x["names_order"]]
+        check(f"the order id also reaches the {svc} trace: a log line names the order and carries that trace id",
+              len(mine) > 0, f"{len(mine)} line(s), store {', '.join(sorted({x['store'] for x in mine})) or 'none'}",
+              "opensearch files")
 
     if fails:
         for j in joins:
@@ -221,12 +258,15 @@ def main():
     for trid, (t, f) in traces.items():
         proc = {k: v["serviceName"] for k, v in t["processes"].items()}
         root = min(t["spans"], key=lambda s: s["startTime"])
+        mine = [s for s in t["spans"] if trid != tid or s["spanID"] in in_order]
         trace_rows.append({"id": trid, "short": short(trid), "role": "checkout" if trid == tid else order_of[trid],
-                           "spans": len(t["spans"]), "services": sorted({proc[s["processID"]] for s in t["spans"]}),
-                           "order_ms": 0.0 if trid == tid else consume_at[short(trid)],
+                           "spans": len(t["spans"]), "order_spans": len(mine),
+                           "services": sorted({proc[s["processID"]] for s in mine}),
+                           "order_ms": ms(order_span["startTime"]) if trid == tid else consume_at[short(trid)],
                            "root_op": root["operationName"], "root_opened_ms": ms(root["startTime"])})
     trace_rows.sort(key=lambda r: r["order_ms"])
     spans_total = sum(r["spans"] for r in trace_rows)
+    spans_scope = sum(r["order_spans"] for r in trace_rows)
 
     flow = {
         "order_id": order, "order_short": short(order), "cluster": cap["cluster"],
@@ -237,8 +277,13 @@ def main():
         "hops": hops,
         "logs": logs,
         "stores": {"jaeger": {"traces": len(trace_rows), "spans": spans_total}, **stores},
-        "facts": {"spans_total": spans_total, "hops": len(hops),
-                  "spans_inside_one_service": spans_total - len(hops),
+        "scope": {"rule": "the one top-level request in the checkout trace whose subtree holds demo.order.id",
+                  "top_level_requests": len(tops), "order_request_spans": len(in_order),
+                  "other_request_spans": len(ckt["spans"]) - len(in_order),
+                  "order_request_op": f"{spans[req['spanID']]['svc']} {req['operationName']}",
+                  "order_request_offset_ms": round((req["startTime"] - min(s["startTime"] for s in ckt["spans"])) / 1000, 1)},
+        "facts": {"spans_total": spans_total, "spans_in_scope": spans_scope, "hops": len(hops),
+                  "spans_inside_one_service": spans_scope - len(hops),
                   "publish_ms": next(h["t_ms"] for h in hops if h["kind"] == "publish"),
                   "consume_ms": {h["to"]: h["t_ms"] for h in hops if h["kind"] == "consume"},
                   "checkout_ms": next(h["dur_ms"] for h in hops if h["op"].endswith("PlaceOrder") and h["to"] == "checkout"),
@@ -258,6 +303,29 @@ def report(cap, f):
          f"Order `{f['order_id']}`, captured {f['captured_at']} from the `{f['cluster']}` cluster.",
          "No source code was read. Every service, edge, time and count below comes from the runtime",
          "data in `evidence/`, which the capture step saved unedited.", "",
+         "## 0. What counts as the order", "",
+         f"The checkout trace holds {f['scope']['top_level_requests']} top-level requests: the shopper's whole "
+         f"session shares one trace. The order is the one request whose subtree holds `demo.order.id`: "
+         f"`{f['scope']['order_request_op']}`, {f['scope']['order_request_spans']} spans, which began "
+         f"{f['scope']['order_request_offset_ms']} ms into the trace. The other "
+         f"{f['scope']['other_request_spans']} spans are browsing and cart requests, and are left out.",
+         "The top-level requests all name a parent span that is not in the trace. The evidence does",
+         "not show what that parent was.",
+         "All times below are milliseconds after that request began.", "",
+         "## Limits", "",
+         "- **Three traces is a lower bound.** The consumer search asked only the services that are not",
+         "  in the checkout trace, for 300 s after the order, up to 500 traces each, and it kept only the",
+         "  counts of those answers. A linked trace in a service inside the checkout trace was not sought.",
+         "- **Cloud Logging was searched in `textPayload` only.** A line with the id in `jsonPayload` would",
+         "  not match. So \"none from checkout\" holds for text lines.",
+         "- **Cross-node times include clock offset.** Services on different nodes stamp their own spans,",
+         "  and nothing here measures the offset between node clocks.",
+         "- **The clip lights each edge once, at its first hop.** Every hop is listed in section 7.",
+         "- **Checkout's order time is a span start.** The id is an attribute of the `PlaceOrder` span,",
+         "  which starts at the time shown. Attributes carry no time of their own.",
+         "- **Log lines without an event time use `observedTimestamp`.** That is when the collector saw",
+         "  them, so they can sit hundreds of milliseconds after the spans they describe.", ""]
+    L += [
          "## 1. What the agent asked, and what came back", "",
          "| # | Store | Question | Answer | Kept as |", "|---|---|---|---|---|"]
     for s in cap["steps"]:
@@ -267,16 +335,17 @@ def report(cap, f):
     for j in f["joins"]:
         L.append(f"- {'PASS' if j['ok'] else 'FAIL'}: {j['what']}. {j['got']} (`{j['evidence']}`)")
     L += ["", "## 3. The three traces", "",
-          "Times are milliseconds after the checkout trace's first span. A consumer's time is the moment",
-          "it had the order, by the rule in section 6. Its root span can open much earlier: it waits.", "",
-          "| Trace | Role | Spans | Has the order at | Root span, opened at | Services |",
+          "Checkout's time is the first span tagged with the order id. A consumer's time is the moment",
+          "it had the order, by the rule in section 6. A consumer's root span opened before that: it waits.",
+          "So the consumers' traces were already open. The order entered them, it did not start them.", "",
+          "| Trace | Role | Spans (in the order's scope) | Has the order at | Earliest span, opened at | Services |",
           "|---|---|---|---|---|---|"]
     for t in f["traces"]:
-        L.append(f"| `{t['short']}` | {t['role']} | {t['spans']} | {t['order_ms']} ms | "
+        L.append(f"| `{t['short']}` | {t['role']} | {t['spans']} ({t['order_spans']}) | {t['order_ms']} ms | "
                  f"`{t['root_op']}`, {t['root_opened_ms']} ms | {', '.join(t['services'])} |")
     fx = f["facts"]
     L += ["", "## 4. What was kept, and what was collapsed", "",
-          f"{fx['spans_total']} spans became {fx['hops']} hops between {len(f['nodes'])} nodes. "
+          f"{fx['spans_in_scope']} spans in the order's scope became {fx['hops']} hops between {len(f['nodes'])} nodes. "
           f"A hop is a call that crosses from one service to another, a write to a store, the queue "
           f"publish, or a queue read. {fx['spans_inside_one_service']} spans stayed inside one service "
           f"and are not drawn.", "",

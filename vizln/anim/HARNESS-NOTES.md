@@ -386,3 +386,17 @@ Three of the six are not harness defects and stay as craft:
   counter value. Land just past it when the point is a reveal.
 - `check.sh` reported clean twice while two real collisions stood, both text
   fading in over static text on another z-layer. Clean is a lower bound.
+
+## The checker never sees node labels, 2026-09-26
+
+Symptom: `check.sh` reported a map clip clean while every store's top rim crossed
+its first label line. Found by an auditor session on `examples/one-order`.
+
+Cause, measured: of the 35 distinct strings the checks tested, none was a node
+label. A label dimmed by `fade_now` sits at fill opacity 0.16, below the 0.3 floor
+of `_visible_texts()`. After `fade_to` lights it, the label is no longer a `Text`
+in the scene tree, because `fade_to` animates each glyph on its own. So a node
+label escapes the off-frame, overlap and ink checks in both states.
+
+Guard until the checker is fixed: on any clip that uses `fade_now` or `fade_to`,
+check the node labels on rendered frames, not with `check.sh`.
