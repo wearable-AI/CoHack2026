@@ -1,0 +1,65 @@
+[
+  {
+    "timestamp": 1695758810100000,
+    "source": "jaeger",
+    "service": "checkout",
+    "type": "span",
+    "name": "oteldemo.CheckoutService/PlaceOrder",
+    "trace_id": "ab12cd34ef56",
+    "span_id": "checkout-span-1"
+  },
+  {
+    "timestamp": 1695758810150000,
+    "source": "jaeger",
+    "service": "checkout",
+    "type": "span",
+    "name": "publish orders",
+    "trace_id": "ab12cd34ef56",
+    "span_id": "checkout-span-2"
+  },
+  {
+    "timestamp": 1695758810200000,
+    "source": "opensearch",
+    "service": "checkout",
+    "type": "log",
+    "message": "order placed: a1b2c3d4",
+    "trace_id": "ab12cd34ef56",
+    "span_id": ""
+  },
+  {
+    "timestamp": 1695758810250000,
+    "source": "jaeger",
+    "service": "accounting",
+    "type": "span",
+    "name": "process_order_queue",
+    "trace_id": "ff99ee88",
+    "span_id": "accounting-span-1"
+  },
+  {
+    "timestamp": 1695758810300000,
+    "source": "opensearch",
+    "service": "accounting",
+    "type": "log",
+    "message": "orderId: a1b2c3d4 processed by accounting",
+    "trace_id": "ff99ee88",
+    "span_id": ""
+  },
+  {
+    "timestamp": 1695758810310000,
+    "source": "jaeger",
+    "service": "fraud-detection",
+    "type": "span",
+    "name": "process_order_queue",
+    "trace_id": "dd77cc66",
+    "span_id": "fraud-span-1"
+  },
+  {
+    "timestamp": 1695758810360000,
+    "source": "opensearch",
+    "service": "fraud-detection",
+    "type": "log",
+    "message": "orderId: a1b2c3d4 processed by fraud-detection",
+    "trace_id": "dd77cc66",
+    "span_id": ""
+  }
+]
