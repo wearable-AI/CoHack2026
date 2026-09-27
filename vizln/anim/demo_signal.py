@@ -104,12 +104,12 @@ class DemoSignal(Clip):
         
         # Drop a marker for the predicted crash time on the timeline
         if t_crash and t_crash < 250:
-            crash_alert = pl.cut(t_crash, color=ORANGE_, label=f"EST. CRASH at {t_crash}s")
+            crash_alert = pl.cut(t_crash, color=RED_, label=f"EST. CRASH at {t_crash}s")
             self.add(pl.at_time(crash_alert, anomaly_detect, clock, ramp=0.5))
             
         self.beat(say=f"Anomaly Detected: Latency crossed 50ms threshold at t={anomaly_detect}s.", color=RED_, hold=1.5)
         
-        self.sweep(clock, anomaly_peak, 2.0, say=f"AI extrapolates Time-To-Failure (TTF) as {t_crash}s.", color=ORANGE_)
+        self.sweep(clock, anomaly_peak, 2.0, say=f"AI extrapolates Time-To-Failure (TTF) as {t_crash}s.", color=RED_)
         
         self.sweep(clock, anomaly_peak + 5, 0.5)
         mitigate = pl.cut(anomaly_peak, color=BLUE_, label="Auto-Mitigation")
