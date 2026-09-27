@@ -50,21 +50,23 @@ class DemoData(Clip):
         # Action!
         self.sweep(clock, 50, 2.0, say="Traffic arrives. The single worker pod processes it slowly.", color=BLUE_)
         
-        # Transfer from ingested -> queue, and queue -> processed
-        a1 = self.transfer(c_ing.out_low, c_q.in_low, color=BLUE_)
-        a2 = self.transfer(c_q.out_low, c_proc.in_low, color=GREEN_)
+        # Transfer from ingested -> queue (100/s) and queue -> processed (50/s)
+        a1 = self.transfer(c_ing.out_low, c_q.in_low, color=BLUE_, width=4.0)
+        a2 = self.transfer(c_q.out_low, c_proc.in_low, color=GREEN_, width=2.0)
         self.play(Create(a1), Create(a2))
         self.sweep(clock, 95, 2.0, say="The queue starts filling up due to backpressure...", color=AMBER_)
-        self.play(FadeOut(a1), FadeOut(a2))
         
         # Queue hits limit
         self.sweep(clock, 100, 1.0)
         self.beat(say="Queue hits its 5,000 capacity limit!", color=RED_, hold=1.0)
         
-        a3 = self.transfer(c_ing.out_low, c_drop.in_low, color=RED_)
-        self.play(Create(a3))
+        # Re-route visual: queue input drops to 50/s, rest dumps into dropped at 50/s
+        self.play(FadeOut(a1))
+        a1_sat = self.transfer(c_ing.out_low, c_q.in_low, color=BLUE_, width=2.0)
+        a3 = self.transfer(c_ing.out_low, c_drop.in_low, color=RED_, width=2.0)
+        self.play(Create(a1_sat), Create(a3))
+        
         self.sweep(clock, 145, 2.0, say="New requests are now being violently dropped!", color=RED_)
-        self.play(FadeOut(a3))
         
         # Autoscaler
         self.sweep(clock, 150, 0.5)
@@ -72,13 +74,21 @@ class DemoData(Clip):
         self.add(tl.at_time(scale_evt, 150, clock, ramp=0.5))
         self.beat(say="Auto-scaler detects the saturation and deploys 3 more pods.", color=TEAL_, hold=1.5)
         
-        # Draining
-        a4 = self.transfer(c_q.out_low, c_proc.in_low, color=GREEN_)
-        self.play(Create(a4))
-        self.sweep(clock, 195, 2.0, say="With 4x compute, the workers rapidly drain the queue.", color=GREEN_)
-        self.play(FadeOut(a4))
+        # Draining: input is 100/s again, output is 200/s (massive arrow!)
+        self.play(FadeOut(a1_sat), FadeOut(a3), FadeOut(a2))
+        a1_fast = self.transfer(c_ing.out_low, c_q.in_low, color=BLUE_, width=4.0)
+        a4 = self.transfer(c_q.out_low, c_proc.in_low, color=GREEN_, width=8.0)
+        self.play(Create(a1_fast), Create(a4))
         
+        self.sweep(clock, 195, 2.0, say="With 4x compute, the workers rapidly drain the queue.", color=GREEN_)
+        
+        # Stable
         self.sweep(clock, 200, 0.5)
         self.beat(say="Queue is completely drained. System is stable.", color=GREEN_, hold=1.5)
+        
+        # Output drops back to stable 100/s
+        self.play(FadeOut(a4))
+        a5 = self.transfer(c_q.out_low, c_proc.in_low, color=GREEN_, width=4.0)
+        self.play(Create(a5))
         
         self.sweep(clock, 250, 2.0, say="Data transfer and backpressure, instantly visible.", color=WHITE)
