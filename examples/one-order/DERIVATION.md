@@ -4,6 +4,24 @@ Order `7c8c01c4-ba22-11f1-903b-b295684fc89c`, captured 2026-09-27T03:21:56+00:00
 No source code was read. Every service, edge, time and count below comes from the runtime
 data in `evidence/`, which the capture step saved unedited.
 
+## 0. What counts as the order
+
+The checkout trace holds 7 top-level requests: the shopper's whole session shares one trace. The order is the one request whose subtree holds `demo.order.id`: `frontend-proxy POST`, 55 spans, which began 100.6 ms into the trace. The other 63 spans are browsing and cart requests, and are left out.
+The top-level requests all name a parent that is not in the trace: the shopper's own span
+was never exported, so the session's origin is not in the evidence.
+All times below are milliseconds after that request began.
+
+## Limits
+
+- **Three traces is a lower bound.** The consumer search asked only the services that are not
+  in the checkout trace, for 300 s after the order, up to 500 traces each, and it kept only the
+  counts of those answers. A linked trace in a service inside the checkout trace was not sought.
+- **Cloud Logging was searched in `textPayload` only.** A line with the id in `jsonPayload` would
+  not match. So "none from checkout" holds for text lines.
+- **Cross-node times include clock offset.** Services on different nodes stamp their own spans,
+  and nothing here measures the offset between node clocks.
+- **The clip lights each edge once, at its first hop.** Every hop is listed in section 7.
+
 ## 1. What the agent asked, and what came back
 
 | # | Store | Question | Answer | Kept as |
@@ -29,32 +47,36 @@ data in `evidence/`, which the capture step saved unedited.
 
 ## 2. How the pieces were joined
 
+- PASS: exactly one top-level request in the trace holds the order id. 1 of 7 top-level requests (`evidence/02-jaeger-trace-a4013e836e1b.json`)
 - PASS: the checkout trace carries the order id. demo.order.id=7c8c01c4-ba22-11f1-903b-b295684fc89c on trace a4013e83 (`evidence/02-jaeger-trace-a4013e836e1b.json`)
 - PASS: checkout published the order to a queue. 1 producer span(s) (`evidence/02-jaeger-trace-a4013e836e1b.json`)
 - PASS: the accounting trace links back to checkout's queue span. FOLLOWS_FROM 68e95041 = publish span 68e95041 (`evidence/14-jaeger-trace-d02a3f06dec1.json`)
-- PASS: accounting has the order only after checkout published it. accounting at 178.1 ms, publish at 175.5 ms (`evidence/14-jaeger-trace-d02a3f06dec1.json`)
+- PASS: accounting has the order only after checkout published it. accounting at 77.5 ms, publish at 74.9 ms (`evidence/14-jaeger-trace-d02a3f06dec1.json`)
 - PASS: the fraud-detection trace links back to checkout's queue span. FOLLOWS_FROM 68e95041 = publish span 68e95041 (`evidence/15-jaeger-trace-0138fcfe9e56.json`)
-- PASS: fraud-detection has the order only after checkout published it. fraud-detection at 178.7 ms, publish at 175.5 ms (`evidence/15-jaeger-trace-0138fcfe9e56.json`)
+- PASS: fraud-detection has the order only after checkout published it. fraud-detection at 77.8 ms, publish at 74.9 ms (`evidence/15-jaeger-trace-0138fcfe9e56.json`)
 - PASS: the consumers read the same Kafka message. accounting offset 1132, fraud-detection offset 1132 (`consumer spans`)
-- PASS: each hop comes from a different span. 58 hops, 58 distinct spans (`all traces`)
+- PASS: each hop comes from a different span. 28 hops, 28 distinct spans (`all traces`)
 - PASS: every opensearch line found by order id really names it. 5 of 5 (`evidence/16-opensearch-by-order.json`)
 - PASS: every cloud-logging line found by order id really names it. 3 of 3 (`evidence/18-cloudlogging-by-order.json`)
 - PASS: every OpenSearch line with a trace id belongs to one of the order's traces. 45 lines, trace ids in ['0138fcfe', 'a4013e83', 'd02a3f06'] (`opensearch files`)
+- PASS: the order id also reaches the accounting trace: a log line names the order and carries that trace id. 1 line(s), store opensearch (`opensearch files`)
+- PASS: the order id also reaches the fraud-detection trace: a log line names the order and carries that trace id. 1 line(s), store opensearch (`opensearch files`)
 
 ## 3. The three traces
 
-Times are milliseconds after the checkout trace's first span. A consumer's time is the moment
-it had the order, by the rule in section 6. Its root span can open much earlier: it waits.
+Checkout's time is the first span tagged with the order id. A consumer's time is the moment
+it had the order, by the rule in section 6. A consumer's root span opened before that: it waits.
+So the consumers' traces were already open. The order entered them, it did not start them.
 
-| Trace | Role | Spans | Has the order at | Root span, opened at | Services |
+| Trace | Role | Spans (in the order's scope) | Has the order at | Earliest span, opened at | Services |
 |---|---|---|---|---|---|
-| `a4013e83` | checkout | 118 | 0.0 ms | `GET`, 0.0 ms | cart, checkout, currency, email, flagd, frontend, frontend-proxy, payment, product-catalog, quote, shipping |
-| `d02a3f06` | accounting | 3 | 178.1 ms | `order-consumed`, -17426.3 ms | accounting |
-| `0138fcfe` | fraud-detection | 2 | 178.7 ms | `receive orders`, 128.4 ms | fraud-detection |
+| `a4013e83` | checkout | 118 (55) | 3.9 ms | `GET`, -100.6 ms | cart, checkout, currency, email, flagd, frontend, frontend-proxy, payment, product-catalog, quote, shipping |
+| `d02a3f06` | accounting | 3 (3) | 77.5 ms | `order-consumed`, -17526.9 ms | accounting |
+| `0138fcfe` | fraud-detection | 2 (2) | 77.8 ms | `receive orders`, 27.8 ms | fraud-detection |
 
 ## 4. What was kept, and what was collapsed
 
-123 spans became 58 hops between 16 nodes. A hop is a call that crosses from one service to another, a write to a store, the queue publish, or a queue read. 65 spans stayed inside one service and are not drawn.
+60 spans in the order's scope became 28 hops between 16 nodes. A hop is a call that crosses from one service to another, a write to a store, the queue publish, or a queue read. 32 spans stayed inside one service and are not drawn.
 
 ## 5. Where the order's log lines are
 
@@ -65,80 +87,50 @@ it had the order, by the rule in section 6. Its root span can open much earlier:
 
 | ms | Store | Service | Field that names the order | Text |
 |---|---|---|---|---|
-| 159.5 | opensearch | checkout | `attributes.demo.order.id` | order placed |
-| 174.0 | opensearch | email | `attributes.demo.order.id` | Order confirmation email sent |
-| 174.3 | cloud-logging | email | `textPayload` | Order confirmation email sent for order 7c8c01c4-ba22-11f1-903b-b29568 |
-| 178.2 | opensearch | accounting | `attributes.@OrderResult` | Order details: {@OrderResult}. |
-| 179.0 | opensearch | fraud-detection | `body` | Consumed record with orderId: 7c8c01c4-ba22-11f1-903b-b295684fc89c, an |
-| 179.6 | cloud-logging | accounting | `textPayload` | Order details: { "orderId": "7c8c01c4-ba22-11f1-903b-b295684fc89c", "s |
-| 179.6 | cloud-logging | fraud-detection | `textPayload` | 2026-09-27 03:21:10 - fraud-detection - Consumed record with orderId:  |
-| 186.7 | opensearch | frontend | `attributes.demo.order.id` | Order placed successfully |
+| 58.9 | opensearch | checkout | `attributes.demo.order.id` | order placed |
+| 73.3 | opensearch | email | `attributes.demo.order.id` | Order confirmation email sent |
+| 73.7 | cloud-logging | email | `textPayload` | Order confirmation email sent for order 7c8c01c4-ba22-11f1-903b-b29568 |
+| 77.5 | opensearch | accounting | `attributes.@OrderResult` | Order details: {@OrderResult}. |
+| 78.4 | opensearch | fraud-detection | `body` | Consumed record with orderId: 7c8c01c4-ba22-11f1-903b-b295684fc89c, an |
+| 79.0 | cloud-logging | accounting | `textPayload` | Order details: { "orderId": "7c8c01c4-ba22-11f1-903b-b295684fc89c", "s |
+| 79.0 | cloud-logging | fraud-detection | `textPayload` | 2026-09-27 03:21:10 - fraud-detection - Consumed record with orderId:  |
+| 86.1 | opensearch | frontend | `attributes.demo.order.id` | Order placed successfully |
 
 ## 6. The queue hop
 
-- 175.5 ms: checkout → kafka · orders (`publish orders`, trace `a4013e83`).
-- 178.1 ms: kafka · orders → accounting (`receive orders`, trace `d02a3f06`). Span 130.0 to 178.1 ms. Rule: receive span: the message is in hand when the span ends.
-- 178.7 ms: kafka · orders → fraud-detection (`process orders`, trace `0138fcfe`). Span 178.7 to 179.5 ms. Rule: process span: it starts after the message arrived.
+- 74.9 ms: checkout → kafka · orders (`publish orders`, trace `a4013e83`).
+- 77.5 ms: kafka · orders → accounting (`receive orders`, trace `d02a3f06`). Span 29.3 to 77.5 ms. Rule: the receive span ends: the message is in hand.
+- 77.8 ms: kafka · orders → fraud-detection (`process orders`, trace `0138fcfe`). Span 78.1 to 78.8 ms. Rule: its parent receive span ends: the message is in hand, before `process orders` starts.
 
 ## 7. Every hop, in time order
 
 | Hop | ms | From | To | Kind | Trace |
 |---|---|---|---|---|---|
-| h01 | 0.7 | frontend-proxy | frontend | call | `a4013e83` |
-| h02 | 3.9 | frontend | product-catalog | call | `a4013e83` |
-| h03 | 5.8 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
-| h04 | 24.7 | frontend-proxy | frontend | call | `a4013e83` |
-| h05 | 28.0 | frontend | cart | call | `a4013e83` |
-| h06 | 28.1 | cart | redis · valkey-cart | store | `a4013e83` |
-| h07 | 29.1 | cart | redis · valkey-cart | store | `a4013e83` |
-| h08 | 29.9 | cart | redis · valkey-cart | store | `a4013e83` |
-| h09 | 31.2 | frontend | cart | call | `a4013e83` |
-| h10 | 31.3 | cart | redis · valkey-cart | store | `a4013e83` |
-| h11 | 39.7 | frontend-proxy | frontend | call | `a4013e83` |
-| h12 | 44.8 | frontend | product-catalog | call | `a4013e83` |
-| h13 | 48.8 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
-| h14 | 58.7 | frontend-proxy | frontend | call | `a4013e83` |
-| h15 | 61.4 | frontend | cart | call | `a4013e83` |
-| h16 | 61.5 | cart | redis · valkey-cart | store | `a4013e83` |
-| h17 | 62.4 | cart | redis · valkey-cart | store | `a4013e83` |
-| h18 | 63.7 | cart | redis · valkey-cart | store | `a4013e83` |
-| h19 | 66.0 | frontend | cart | call | `a4013e83` |
-| h20 | 66.1 | cart | redis · valkey-cart | store | `a4013e83` |
-| h21 | 73.7 | frontend-proxy | frontend | call | `a4013e83` |
-| h22 | 76.5 | frontend | product-catalog | call | `a4013e83` |
-| h23 | 78.4 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
-| h24 | 87.7 | frontend-proxy | frontend | call | `a4013e83` |
-| h25 | 90.8 | frontend | cart | call | `a4013e83` |
-| h26 | 91.0 | cart | redis · valkey-cart | store | `a4013e83` |
-| h27 | 91.9 | cart | redis · valkey-cart | store | `a4013e83` |
-| h28 | 92.3 | cart | redis · valkey-cart | store | `a4013e83` |
-| h29 | 93.6 | frontend | cart | call | `a4013e83` |
-| h30 | 93.7 | cart | redis · valkey-cart | store | `a4013e83` |
-| h31 | 101.7 | frontend-proxy | frontend | call | `a4013e83` |
-| h32 | 104.5 | frontend | checkout | call | `a4013e83` |
-| h33 | 106.6 | checkout | cart | call | `a4013e83` |
-| h34 | 106.8 | cart | redis · valkey-cart | store | `a4013e83` |
-| h35 | 110.7 | checkout | product-catalog | call | `a4013e83` |
-| h36 | 114.2 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
-| h37 | 119.8 | checkout | currency | call | `a4013e83` |
-| h38 | 121.8 | checkout | product-catalog | call | `a4013e83` |
-| h39 | 124.2 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
-| h40 | 129.1 | checkout | currency | call | `a4013e83` |
-| h41 | 134.8 | checkout | shipping | call | `a4013e83` |
-| h42 | 140.0 | shipping | quote | call | `a4013e83` |
-| h43 | 145.7 | checkout | currency | call | `a4013e83` |
-| h44 | 148.7 | checkout | payment | call | `a4013e83` |
-| h45 | 153.9 | checkout | shipping | call | `a4013e83` |
-| h46 | 155.1 | checkout | cart | call | `a4013e83` |
-| h47 | 156.1 | cart | flagd | call | `a4013e83` |
-| h48 | 157.7 | cart | redis · valkey-cart | store | `a4013e83` |
-| h49 | 158.4 | cart | redis · valkey-cart | store | `a4013e83` |
-| h50 | 162.8 | checkout | email | call | `a4013e83` |
-| h51 | 175.5 | checkout | kafka · orders | publish | `a4013e83` |
-| h52 | 178.1 | kafka · orders | accounting | consume | `d02a3f06` |
-| h53 | 178.7 | kafka · orders | fraud-detection | consume | `0138fcfe` |
-| h54 | 179.6 | accounting | postgresql · astronomy-db | store | `d02a3f06` |
-| h55 | 179.7 | frontend | product-catalog | call | `a4013e83` |
-| h56 | 180.0 | frontend | product-catalog | call | `a4013e83` |
-| h57 | 183.1 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
-| h58 | 183.6 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
+| h01 | 1.1 | frontend-proxy | frontend | call | `a4013e83` |
+| h02 | 3.9 | frontend | checkout | call | `a4013e83` |
+| h03 | 6.0 | checkout | cart | call | `a4013e83` |
+| h04 | 6.2 | cart | redis · valkey-cart | store | `a4013e83` |
+| h05 | 10.1 | checkout | product-catalog | call | `a4013e83` |
+| h06 | 13.6 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
+| h07 | 19.2 | checkout | currency | call | `a4013e83` |
+| h08 | 21.2 | checkout | product-catalog | call | `a4013e83` |
+| h09 | 23.5 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
+| h10 | 28.5 | checkout | currency | call | `a4013e83` |
+| h11 | 34.2 | checkout | shipping | call | `a4013e83` |
+| h12 | 39.4 | shipping | quote | call | `a4013e83` |
+| h13 | 45.1 | checkout | currency | call | `a4013e83` |
+| h14 | 48.1 | checkout | payment | call | `a4013e83` |
+| h15 | 53.3 | checkout | shipping | call | `a4013e83` |
+| h16 | 54.5 | checkout | cart | call | `a4013e83` |
+| h17 | 55.5 | cart | flagd | call | `a4013e83` |
+| h18 | 57.1 | cart | redis · valkey-cart | store | `a4013e83` |
+| h19 | 57.8 | cart | redis · valkey-cart | store | `a4013e83` |
+| h20 | 62.2 | checkout | email | call | `a4013e83` |
+| h21 | 74.9 | checkout | kafka · orders | publish | `a4013e83` |
+| h22 | 77.5 | kafka · orders | accounting | consume | `d02a3f06` |
+| h23 | 77.8 | kafka · orders | fraud-detection | consume | `0138fcfe` |
+| h24 | 79.0 | frontend | product-catalog | call | `a4013e83` |
+| h25 | 79.0 | accounting | postgresql · astronomy-db | store | `d02a3f06` |
+| h26 | 79.4 | frontend | product-catalog | call | `a4013e83` |
+| h27 | 82.4 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |
+| h28 | 83.0 | product-catalog | postgresql · astronomy-db | store | `a4013e83` |

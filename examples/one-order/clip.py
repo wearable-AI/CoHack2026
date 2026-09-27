@@ -40,14 +40,16 @@ def spread(want):
 
 
 def layout():
-    """Services by depth. A store is drawn once per writer, one column to its right,
-    so no wire runs backwards across the map."""
+    """Services by depth. A store is drawn once per caller, one column to its right,
+    so no wire runs backwards across the map. Each copy takes the colour of the trace
+    that its calls belong to."""
     boxes = [dict(n) for n in F["nodes"] if n["kind"] != "store"]
     depth = {n["id"]: n["depth"] for n in F["nodes"]}
     for e in F["edges"]:
         if e["kind"] == "store":
             boxes.append({"id": f"{e['to']}@{e['from']}", "store": e["to"], "kind": "store",
-                          "depth": depth[e["from"]] + 1, "first_ms": e["first_ms"], "parent": e["from"]})
+                          "depth": depth[e["from"]] + 1, "first_ms": e["first_ms"], "parent": e["from"],
+                          "trace": HOP[e["hops"][0]]["trace"]})
     parent = {}
     for e in F["edges"]:
         parent.setdefault(e["to"], e["from"])
@@ -83,12 +85,16 @@ class OneOrder(Clip):
         self.source(f"{F['cluster']} · order {F['order_short']} · {F['captured_at'][11:16]} UTC")
         boxes, pos = layout()
 
+        def thin_lip(c, w, h, color):
+            return cylinder(c, w, h, color, lip=0.09)
+
         mobs = {}
         for b in boxes:
             name = b.get("store", b["id"])
-            col = BLUE_ if b["kind"] == "queue" else TCOL[first_trace(name)]
+            col = BLUE_ if b["kind"] == "queue" else TCOL[b.get("trace") or first_trace(name)]
             if b["kind"] == "store":
-                mobs[b["id"]] = node(cylinder, pos[b["id"]], name.split(" · "), col, w=W, h=H2)
+                mobs[b["id"]] = node(thin_lip, pos[b["id"]], name.split(" · "), col, w=W, h=H2)
+                mobs[b["id"]].body.shift(DOWN * 0.05)   # clear the top rim
             elif b["kind"] == "queue":
                 mobs[b["id"]] = node(capsule, pos[b["id"]], name.split(" · "), col, w=W, h=H2)
             elif name in LANG:
@@ -120,11 +126,16 @@ class OneOrder(Clip):
                                                stroke_width=1.4, color=DIM_).set_stroke(opacity=0.35)
         self.beat(*[FadeIn(m) for m in mobs.values()], *[FadeIn(w) for w in wires.values()],
                   say="every box was found in traces, none in code", color=DIM_, hold=1.0)
+        self.beat(say=f"the order is 1 of {F['scope']['top_level_requests']} requests that share its trace",
+                  color=DIM_, hold=1.2)
+
+        def spans_txt(t):
+            return f"{t['order_spans']} of {t['spans']}" if t["order_spans"] != t["spans"] else f"{t['spans']}"
 
         # ---------- the order moves, one stop per burst of calls ----------
         clock = self.tracker(0)
         self.live_text(lambda: f"t = {clock.get_value():6.1f} ms", [-6.6, -1.55, 0], font_size=15, color=DIM_)
-        chips = {t["short"]: T(f"{t['short']} {t['role']} {t['spans']} spans", 12, font=MONO,
+        chips = {t["short"]: T(f"{t['short']} {t['role']} {spans_txt(t)} spans", 12, font=MONO,
                                color=TCOL[t["short"]]).move_to([-6.6, -2.0 - i * 0.36, 0], aligned_edge=LEFT)
                  for i, t in enumerate(F["traces"])}
         shown = set()
@@ -164,39 +175,42 @@ class OneOrder(Clip):
                 say = say_at.get(e["to"], say)
             self.beat(*anims, say=say, color=TEAL_ if say else WHITE, hold=0.9 if say else 0.25, run=0.5)
 
-        # ---------- after the queue: new traces ----------
-        self.beat(say=f"trace {F['traces'][0]['short']} ends at the Kafka send", color=TEAL_, hold=1.2)
+        # ---------- after the queue: the order enters other traces ----------
+        self.beat(say=f"the consumers are not in trace {F['traces'][0]['short']}", color=TEAL_, hold=1.2)
         for e in after:
             self.sweep(clock, e["first_ms"], 0.6)
             anims, new, h, far = light(e)
-            say = f"{e['to']}: {round(h['t_ms'] - FX['publish_ms'], 1)} ms later, in a new trace" if new else None
+            say = f"{e['to']}: {round(h['t_ms'] - FX['publish_ms'], 1)} ms later, in a different trace" if new else None
             self.beat(*anims, pulse(far, TCOL[h["trace"]]), say=say, color=TCOL[h["trace"]],
                       hold=1.2 if new else 0.4, run=0.5)
 
         # ---------- board 2: what joins the three ----------
-        b2 = self.board(DOWN * 10, "Jaeger sees three stories", "two facts in the data make them one")
+        b2 = self.board(DOWN * 10, "Jaeger sees three stories", "three facts in the data make them one")
         y0 = -10 + 1.7
         rows = VGroup(*[
-            T(f"{t['short']}   {t['role']:<16} {t['spans']:>3} spans   has the order at {t['order_ms']} ms",
+            T(f"{t['short']}   {t['role']:<16} {spans_txt(t):>9} spans   has the order at {t['order_ms']} ms",
               15, font=MONO, color=TCOL[t["short"]]).move_to([-6.2, y0 - i * 0.5, 0], aligned_edge=LEFT)
             for i, t in enumerate(F["traces"])])
         offs = sorted(set(FX["kafka_offsets"].values()))
+        reached = [j for j in F["joins"] if j["what"].startswith("the order id also reaches") and j["ok"]]
         link = VGroup(
             T(f"1. both consumers point back at checkout's Kafka span {FX['publish_span']}", 15,
               color=WHITE).move_to([-6.2, y0 - 1.9, 0], aligned_edge=LEFT),
-            T(f"2. both read Kafka offset {', '.join(map(str, offs))}", 15,
-              color=WHITE).move_to([-6.2, y0 - 2.4, 0], aligned_edge=LEFT))
+            T(f"2. the two consumers read the same Kafka message, offset {', '.join(map(str, offs))}", 15,
+              color=WHITE).move_to([-6.2, y0 - 2.4, 0], aligned_edge=LEFT),
+            T(f"3. in {len(reached)} consumer traces, a log line names order {F['order_short']} "
+              f"and carries that trace id", 15, color=WHITE).move_to([-6.2, y0 - 2.9, 0], aligned_edge=LEFT))
         st = F["stores"]
         miss = sorted(set(st["opensearch"]["services"]) - set(st["cloud-logging"]["services"]))
         logs = VGroup(
             T(f"OpenSearch: {st['opensearch']['lines_naming_order']} lines name the order, from "
               f"{len(st['opensearch']['services'])} services", 15, color=GREEN_).move_to(
-                [-6.2, y0 - 3.4, 0], aligned_edge=LEFT),
-            T(f"Cloud Logging: {st['cloud-logging']['lines_naming_order']} lines, and none from "
-              f"{', '.join(miss)}", 15, color=AMBER_).move_to([-6.2, y0 - 3.9, 0], aligned_edge=LEFT))
+                [-6.2, y0 - 3.8, 0], aligned_edge=LEFT),
+            T(f"Cloud Logging: {st['cloud-logging']['lines_naming_order']} lines name the order, none from "
+              f"{' or '.join(miss)}", 15, color=AMBER_).move_to([-6.2, y0 - 4.3, 0], aligned_edge=LEFT))
         self.travel(b2, hold=0.0)
         self.beat(*self.show(rows), say="three trace ids for one order", hold=1.2)
-        self.beat(*self.show(link), say="the span link and the Kafka offset join them", hold=1.6)
+        self.beat(*self.show(link), say="a span link, a Kafka offset and the order id join them", hold=2.0)
         self.beat(*self.show(logs), say="and the logs are split across two stores", color=AMBER_, hold=1.8)
 
         # ---------- board 3: how this clip was made ----------
@@ -207,4 +221,5 @@ class OneOrder(Clip):
         flow_, _ = self.chain(steps, colours=[BLUE_, BLUE_, GREEN_, TEAL_, WHITE],
                               where=DOWN * 20 + UP * 0.4, w=12.6, h=1.0)
         self.beat(*self.show(flow_), say="asked, saved, joined, checked, drawn", hold=1.4)
-        self.beat(say="Jaeger sees three stories. The order id makes them one.", color=WHITE, hold=2.6)
+        self.beat(say="Jaeger sees three stories. The span link and the order id make them one.",
+                  color=WHITE, hold=2.6)
