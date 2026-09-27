@@ -12,10 +12,17 @@ def get_trace_latency(t):
     return trace_data[idx]["latency_ms"]
 
 def prediction(t):
-    # Dotted line prediction showing the crash trajectory
-    if t < 100:
+    # The prediction algorithm actually calculates the trend from the raw data
+    if t <= 110:
         return get_trace_latency(t)
-    return get_trace_latency(100) + (t - 100)**1.5
+        
+    # Measure the slope of the anomaly during the detection window
+    latency_at_100 = get_trace_latency(100)
+    latency_at_110 = get_trace_latency(110)
+    trend_slope = (latency_at_110 - latency_at_100) / 10.0
+    
+    # Project the trend forward aggressively (simulating a cascading failure)
+    return latency_at_110 + trend_slope * (t - 110) * 1.5
 
 def safe_bound(t):
     return 50
