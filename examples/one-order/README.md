@@ -8,8 +8,10 @@ them:
 2. The two consumers read the same Kafka message (the same offset).
 3. In both consumer traces, a log line names the order id and carries that trace's id.
 
-**The clip** is one schematic map in the style of RunWire: Manhattan wires through lanes, a box
-stays dim until the order reaches it, and the Kafka consumers' wires glow as open subscriptions
+**The clip** is one schematic map in the style of RunWire: Manhattan wires through lanes, and a box
+or wire appears only when the order reaches it. Each box carries its language or technology icon
+(from the runtime `telemetry.sdk.language`), and its shape shows its role in this order: entry,
+web tier, orchestrator, service, queue or store. The map builds itself as the order moves, and the Kafka consumers' wires glow as open subscriptions
 from the moment each one started waiting. It ends with a zoom into `checkout`: its 72 ms, one bar
 per call, from the real spans.
 
@@ -42,6 +44,7 @@ From the repo root:
 ```sh
 sandbox/capture.sh gke examples/one-order <order-id>    # or leave out the id for the latest order
 python3 vizln/flow/derive.py examples/one-order          # stops with an error if a join fails
+vizln/assets/fetch-tech-icons.sh                         # once: devicon icons, MIT
 vizln/anim/check.sh  examples/one-order/clip.py
 vizln/anim/render.sh examples/one-order/clip.py --q qh --gif
 ```

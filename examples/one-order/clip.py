@@ -27,7 +27,7 @@ CALLER = {e["to"]: e["from"] for e in reversed(F["edges"])}   # who first reache
 EDGE_TRACE = {(e["from"], e["to"]): HOP[e["hops"][0]]["trace"] for e in F["edges"]}
 
 COLX = [-5.75, -3.1, -0.45, 2.35, 5.3]
-COLW = [2.0, 2.0, 1.8, 2.1, 2.1]
+COLW = [2.0, 2.0, 1.8, 2.3, 2.3]
 H, HS, TOP, BOT, GAP = 0.62, 0.78, 2.3, -2.5, 0.78
 BACK_X = 6.62          # the one wire that returns to an earlier box runs out here
 
@@ -69,6 +69,65 @@ def layout():
     return pos
 
 
+ICONS = Path(__file__).resolve().parents[2] / "vizln" / "assets" / "tech-icons"
+ICON_FILE = {"go": "go", "dotnet": "dotnet", "cpp": "cpp", "nodejs": "nodejs", "rust": "rust", "ruby": "ruby",
+             "php": "php", "java": "java", "kafka": "kafka", "postgresql": "postgresql", "redis": "redis"}
+MONO_ICONS = {"rust", "kafka"}   # black logos, painted white for a black ground
+
+
+def tech_icon(key, h=0.32):
+    m = SVGMobject(str(ICONS / f"{ICON_FILE[key]}.svg"))
+    m.set_stroke(width=0).set_height(h)
+    if m.width > 1.7 * h:
+        m.set_width(1.7 * h)
+    if key in MONO_ICONS:
+        m.set_fill(WHITE, opacity=1)
+    return m
+
+
+def chevron(c, w, h, color):
+    """The entry: the first box the order touched."""
+    x, y, d = c[0], c[1], h / 2
+    pts = [[x - w / 2, y + d], [x + w / 2 - d, y + d], [x + w / 2, y], [x + w / 2 - d, y - d],
+           [x - w / 2, y - d], [x - w / 2 + d * 0.6, y]]
+    return Polygon(*[[p[0], p[1], 0] for p in pts], stroke_color=color, stroke_width=2,
+                   fill_color=BG_, fill_opacity=1)
+
+
+def hexagon(c, w, h, color):
+    """The orchestrator. Flat sides, so ports sit on the edge."""
+    x, y, d = c[0], c[1], 0.32
+    pts = [[x, y + h / 2], [x + w / 2, y + h / 2 - d], [x + w / 2, y - h / 2 + d], [x, y - h / 2],
+           [x - w / 2, y - h / 2 + d], [x - w / 2, y + h / 2 - d]]
+    g = Polygon(*[[p[0], p[1], 0] for p in pts], stroke_color=color, stroke_width=2,
+                fill_color=BG_, fill_opacity=1)
+    g.port_half = h / 2 - d - 0.06
+    return g
+
+
+def thin_cylinder(c, w, h, color):
+    return cylinder(c, w, h, color, lip=0.09)
+
+
+def badged(maker, c, name, color, w, h, icon_key, stacked=False, lift=0.0):
+    """A shape with a tech badge beside its name, or above it when stacked."""
+    n = node(maker, c, [name], color, w=w, h=h)
+    if icon_key and icon_key in ICON_FILE:
+        ic = tech_icon(icon_key, 0.42 if stacked else 0.30)
+        if stacked:
+            ic.move_to([c[0], c[1] + 0.3, 0])
+            n.body.move_to([c[0], c[1] - 0.25, 0])
+        else:
+            total = ic.width + 0.12 + n.body.width
+            left = c[0] - total / 2
+            ic.move_to([left + ic.width / 2, c[1] + lift, 0])
+            n.body.move_to([left + ic.width + 0.12 + n.body.width / 2, c[1] + lift, 0])
+            assert total < w - 0.16, f"{name} and its badge do not fit in {w}"
+        n.add(ic)
+        n.icon = ic
+    return n
+
+
 def fan(src_port_y, targets, bay):
     """Lane per wire so a fan-out never crosses itself: rising wires turn in top-down
     order, falling wires in bottom-up order, level wires take no lane."""
@@ -91,26 +150,32 @@ class OneOrder(Clip):
         self.source(f"{F['cluster']} · order {F['order_short']} · {F['captured_at'][11:16]} UTC")
         pos = layout()
 
-        # ---------- boxes: shape says what kind, colour says which trace ----------
+        # ---------- boxes: shape says the role in this order, the badge says the tech ----------
+        # the orchestrator is the service that makes the most distinct calls
+        fanout = {}
+        for e in F["edges"]:
+            fanout[e["from"]] = fanout.get(e["from"], 0) + 1
+        hub = max((k for k in fanout if NODE[k]["kind"] == "service"), key=lambda k: fanout[k])
         mobs = {}
         for n in F["nodes"]:
             nid, c = n["id"], column(n)
             first = next(h["trace"] for h in F["hops"] if nid in (h["from"], h["to"]))
             col = BLUE_ if n["kind"] == "queue" else TCOL[first]
-            lines = nid.split(" · ") if " · " in nid else [nid] + ([NICE.get(LANG[nid], LANG[nid])] if nid in LANG else [])
             if n["kind"] == "store":
-                mobs[nid] = node(lambda c_, w_, h_, k_: cylinder(c_, w_, h_, k_, lip=0.09),
-                                 pos[nid], lines, col, w=COLW[c], h=HS)
-                mobs[nid].body.shift(DOWN * 0.05)   # clear the top rim
+                kind, name = nid.split(" · ")
+                mobs[nid] = badged(thin_cylinder, pos[nid], name, col, COLW[c], HS, kind, lift=-0.05)
             elif n["kind"] == "queue":
-                mobs[nid] = node(pail, pos[nid], lines, col, w=COLW[c], h=H)
+                kind, name = nid.split(" · ")
+                mobs[nid] = badged(pail, pos[nid], name, col, COLW[c], H, kind)
+            elif nid == hub:
+                mobs[nid] = badged(hexagon, pos[nid], nid, col, COLW[c], 1.9, LANG.get(nid), stacked=True)
             elif c == 0:
-                mobs[nid] = node(capsule, pos[nid], lines, col, w=COLW[c], h=H)
-            elif nid == "checkout":
-                mobs[nid] = node(box, pos[nid], lines, col, w=COLW[c], h=1.9)
+                mobs[nid] = badged(chevron, pos[nid], nid, col, COLW[c], H, LANG.get(nid))
+            elif c == 1:
+                mobs[nid] = badged(capsule, pos[nid], nid, col, COLW[c], H, LANG.get(nid))
             else:
-                mobs[nid] = node(box, pos[nid], lines, col, w=COLW[c], h=H)
-            fade_now(mobs[nid], SLEEP_)
+                mobs[nid] = badged(box, pos[nid], nid, col, COLW[c], H, LANG.get(nid))
+            fade_now(mobs[nid], 0.0)   # hidden until the order reaches it
 
         # ---------- wires: Manhattan runs through lanes in the gaps ----------
         def right(nid):
@@ -132,7 +197,7 @@ class OneOrder(Clip):
         out_port, in_port = {}, {}
         for src, tos in out_edges.items():
             fwd = sorted([t for t in tos if (src, t) not in back | skip], key=lambda t: -pos[t][1])
-            half = mobs[src].shape.height / 2 - 0.12
+            half = getattr(mobs[src].shape, 'port_half', mobs[src].shape.height / 2 - 0.12)
             spec = {t: (RIGHT, 0.0 if len(fwd) == 1 else half - 2 * half * i / (len(fwd) - 1))
                     for i, t in enumerate(fwd)}
             got = ports(mobs[src].shape, **{f"p{i}": s for i, s in enumerate(spec.values())})
@@ -183,10 +248,10 @@ class OneOrder(Clip):
                                 color=TCOL[EDGE_TRACE[(s, t)]])
 
         for w in wires.values():
-            w.idle()                 # wired and carrying nothing until a message goes down it
+            w.idle(0.0)              # hidden until a message goes down it
         self.add(*wires.values())
-        self.beat(*[FadeIn(m) for m in mobs.values()],
-                  say="every box was found in traces, none in code", color=DIM_, hold=1.0)
+        self.add(*mobs.values())
+        self.beat(say="the map draws itself from the traces, not from code", color=DIM_, hold=1.2)
         self.beat(say=f"the order is 1 of {F['scope']['top_level_requests']} requests that share its trace",
                   color=DIM_, hold=1.2)
 
@@ -206,7 +271,7 @@ class OneOrder(Clip):
         later = [(ms_, t) for ms_, t in waiting if ms_ > 0]
         if early:
             self.beat(*[a for t in early for a in wires[consumer_wire[t["role"]]].watch(TCOL[t["short"]])],
-                      *[a for t in early for a in fade_to(mobs[t["role"]], 0.5)],
+                      *[a for t in early for a in fade_to(mobs[t["role"]], 0.5)], *fade_to(mobs[FX["queue"]], 0.4),
                       say=f"{' and '.join(t['role'] for t in early)} already waits on Kafka",
                       color=TCOL[early[0]["short"]], hold=1.2)
 
@@ -253,7 +318,7 @@ class OneOrder(Clip):
             for kind_, _, o in burst:
                 if kind_ == "wait":
                     anims += [*wires[consumer_wire[o["role"]]].watch(TCOL[o["short"]]),
-                              *fade_to(mobs[o["role"]], 0.5)]
+                              *fade_to(mobs[o["role"]], 0.5), *fade_to(mobs[FX["queue"]], 0.4)]
                     say, col = f"{o['role']} starts waiting on Kafka", TCOL[o["short"]]
                     continue
                 a, new, h, key = light(o)
