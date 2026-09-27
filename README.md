@@ -28,12 +28,12 @@ The shop already records what happens, in 3 places:
 | Place | What it holds |
 |---|---|
 | Jaeger | the list of calls that each request made (a trace) |
-| OpenSearch | log lines from the services that log through OpenTelemetry, for example `checkout` |
-| Google Cloud Logging | log lines from the services that print to the screen, for example `fraud-detection` |
+| OpenSearch | the log lines that each service sends through OpenTelemetry |
+| Google Cloud Logging | copies of what each container prints to the screen. Some services print nothing |
 
 ### The problem, measured
 
-One order is split across all three places:
+One order, captured in `examples/one-order/`:
 
 ```
 checkout ─► cart, currency, shipping, payment, email     Jaeger: one trace
@@ -41,12 +41,14 @@ checkout ─► cart, currency, shipping, payment, email     Jaeger: one trace
    └─► Kafka "orders" ─┬─► accounting                     Jaeger: a new trace
                        └─► fraud-detection                Jaeger: a new trace
 
-checkout logs "order placed"         ─► OpenSearch
-the consumers log "orderId: ..."     ─► Cloud Logging
+log lines that name the order:
+  OpenSearch      5, from checkout, email, frontend, accounting, fraud-detection
+  Cloud Logging   3, from email, accounting, fraud-detection. None from checkout
 ```
 
-The trace stops at the queue (Kafka), and Jaeger's own service map shows no edge after it. No
-single screen shows the whole order.
+The trace stops at the queue (Kafka), and Jaeger's own service map shows no edge after it. The
+logs name the order, but they hold no call structure, and each store holds a different subset.
+No single screen shows the whole order.
 
 ## What our product does
 

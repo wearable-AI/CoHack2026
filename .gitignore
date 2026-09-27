@@ -4,11 +4,8 @@ __pycache__/
 .venv/
 env/
 
-# Manim Media Output
+# Manim's working cache. Finished clips and frames are tracked.
 media/
-backend/media/
-*.mp4
-*.png
 
 # Node / Frontend
 node_modules/
