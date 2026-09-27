@@ -8,6 +8,11 @@ them:
 2. The two consumers read the same Kafka message (the same offset).
 3. In both consumer traces, a log line names the order id and carries that trace's id.
 
+**The clip** is one schematic map in the style of RunWire: Manhattan wires through lanes, a box
+stays dim until the order reaches it, and the Kafka consumers' wires glow as open subscriptions
+from the moment each one started waiting. It ends with a zoom into `checkout`: its 72 ms, one bar
+per call, from the real spans.
+
 **Runtime only.** No source code was read. Every service, edge, time, language and count
 comes from what the running system recorded.
 

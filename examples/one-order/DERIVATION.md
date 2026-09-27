@@ -7,8 +7,8 @@ data in `evidence/`, which the capture step saved unedited.
 ## 0. What counts as the order
 
 The checkout trace holds 7 top-level requests: the shopper's whole session shares one trace. The order is the one request whose subtree holds `demo.order.id`: `frontend-proxy POST`, 55 spans, which began 100.6 ms into the trace. The other 63 spans are browsing and cart requests, and are left out.
-The top-level requests all name a parent that is not in the trace: the shopper's own span
-was never exported, so the session's origin is not in the evidence.
+The top-level requests all name a parent span that is not in the trace. The evidence does
+not show what that parent was.
 All times below are milliseconds after that request began.
 
 ## Limits
@@ -21,6 +21,10 @@ All times below are milliseconds after that request began.
 - **Cross-node times include clock offset.** Services on different nodes stamp their own spans,
   and nothing here measures the offset between node clocks.
 - **The clip lights each edge once, at its first hop.** Every hop is listed in section 7.
+- **Checkout's order time is a span start.** The id is an attribute of the `PlaceOrder` span,
+  which starts at the time shown. Attributes carry no time of their own.
+- **Log lines without an event time use `observedTimestamp`.** That is when the collector saw
+  them, so they can sit hundreds of milliseconds after the spans they describe.
 
 ## 1. What the agent asked, and what came back
 

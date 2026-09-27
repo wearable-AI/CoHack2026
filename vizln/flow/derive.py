@@ -309,8 +309,8 @@ def report(cap, f):
          f"`{f['scope']['order_request_op']}`, {f['scope']['order_request_spans']} spans, which began "
          f"{f['scope']['order_request_offset_ms']} ms into the trace. The other "
          f"{f['scope']['other_request_spans']} spans are browsing and cart requests, and are left out.",
-         "The top-level requests all name a parent that is not in the trace: the shopper's own span",
-         "was never exported, so the session's origin is not in the evidence.",
+         "The top-level requests all name a parent span that is not in the trace. The evidence does",
+         "not show what that parent was.",
          "All times below are milliseconds after that request began.", "",
          "## Limits", "",
          "- **Three traces is a lower bound.** The consumer search asked only the services that are not",
@@ -320,7 +320,11 @@ def report(cap, f):
          "  not match. So \"none from checkout\" holds for text lines.",
          "- **Cross-node times include clock offset.** Services on different nodes stamp their own spans,",
          "  and nothing here measures the offset between node clocks.",
-         "- **The clip lights each edge once, at its first hop.** Every hop is listed in section 7.", ""]
+         "- **The clip lights each edge once, at its first hop.** Every hop is listed in section 7.",
+         "- **Checkout's order time is a span start.** The id is an attribute of the `PlaceOrder` span,",
+         "  which starts at the time shown. Attributes carry no time of their own.",
+         "- **Log lines without an event time use `observedTimestamp`.** That is when the collector saw",
+         "  them, so they can sit hundreds of milliseconds after the spans they describe.", ""]
     L += [
          "## 1. What the agent asked, and what came back", "",
          "| # | Store | Question | Answer | Kept as |", "|---|---|---|---|---|"]
