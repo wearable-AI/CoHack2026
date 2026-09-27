@@ -1,0 +1,179 @@
+{
+  "order_id": "7c8c01c4-ba22-11f1-903b-b295684fc89c",
+  "checkout_trace": "a4013e836e1b52a0dac860b7b701f713",
+  "cluster": "gke",
+  "captured_at": "2026-09-27T03:21:56+00:00",
+  "producer_spans": [
+    "68e95041db533f9e"
+  ],
+  "linked_traces": [
+    {
+      "service": "accounting",
+      "trace": "d02a3f06dec1b9b456e5ce05f392fd13"
+    },
+    {
+      "service": "fraud-detection",
+      "trace": "0138fcfe9e569ac680e9d74c9d008348"
+    }
+  ],
+  "steps": [
+    {
+      "n": 1,
+      "source": "jaeger",
+      "question": "checkout traces tagged demo.order.id=7c8c01c4-ba22-11f1-903b-b295684fc89c",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=checkout&tags=%7B%22demo.order.id%22%3A+%227c8c01c4-ba22-11f1-903b-b295684fc89c%22%7D&limit=5&lookback=6h",
+      "file": "evidence/01-jaeger-search-checkout.json",
+      "bytes": 158669,
+      "sha256": "6dc410bd938e7848fd47bd680cc8a465bd0f907e29df8f7a4f7ac9ba9e5c989d",
+      "count": 1
+    },
+    {
+      "n": 2,
+      "source": "jaeger",
+      "question": "the full trace a4013e836e1b52a0dac860b7b701f713",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces/a4013e836e1b52a0dac860b7b701f713",
+      "file": "evidence/02-jaeger-trace-a4013e836e1b.json",
+      "bytes": 160215,
+      "sha256": "3076fe6d07e14791d382dcaefb51f7dce43e5363986614bd55165f9f9eece10a",
+      "count": 118
+    },
+    {
+      "n": 3,
+      "source": "jaeger",
+      "question": "the services Jaeger has seen",
+      "request": "GET http://localhost:28080/jaeger/ui/api/services",
+      "file": null,
+      "count": 21
+    },
+    {
+      "n": 4,
+      "source": "jaeger",
+      "question": "accounting traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=accounting&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 1
+    },
+    {
+      "n": 5,
+      "source": "jaeger",
+      "question": "ad traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=ad&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 6,
+      "source": "jaeger",
+      "question": "agent traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=agent&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 7,
+      "source": "jaeger",
+      "question": "chatbot traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=chatbot&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 8,
+      "source": "jaeger",
+      "question": "fraud-detection traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=fraud-detection&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 1
+    },
+    {
+      "n": 9,
+      "source": "jaeger",
+      "question": "frontend-web traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=frontend-web&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 10,
+      "source": "jaeger",
+      "question": "image-provider traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=image-provider&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 11,
+      "source": "jaeger",
+      "question": "jaeger traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=jaeger&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 12,
+      "source": "jaeger",
+      "question": "mcp traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=mcp&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 13,
+      "source": "jaeger",
+      "question": "recommendation traces in the 300s after the order that link to a4013e836e1b",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces?service=recommendation&start=1790479270535287&end=1790479570535287&limit=500",
+      "file": null,
+      "count": 0
+    },
+    {
+      "n": 14,
+      "source": "jaeger",
+      "question": "the full accounting trace d02a3f06dec1b9b456e5ce05f392fd13",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces/d02a3f06dec1b9b456e5ce05f392fd13",
+      "file": "evidence/14-jaeger-trace-d02a3f06dec1.json",
+      "bytes": 4991,
+      "sha256": "9a75ad19729e7eaa9f71c034171129ca4041ff019644887956986087ccd54908",
+      "count": 3
+    },
+    {
+      "n": 15,
+      "source": "jaeger",
+      "question": "the full fraud-detection trace 0138fcfe9e569ac680e9d74c9d008348",
+      "request": "GET http://localhost:28080/jaeger/ui/api/traces/0138fcfe9e569ac680e9d74c9d008348",
+      "file": "evidence/15-jaeger-trace-0138fcfe9e56.json",
+      "bytes": 4901,
+      "sha256": "67b8e43e7905e2abc9e64fbc894f6fe93a162f035281669866e79d07c8297cf0",
+      "count": 2
+    },
+    {
+      "n": 16,
+      "source": "opensearch",
+      "question": "log lines that contain the order id",
+      "request": "POST http://localhost:29200/otel-logs-*/_search {\"query\": {\"query_string\": {\"query\": \"\\\"7c8c01c4-ba22-11f1-903b-b295684fc89c\\\"\"}}, \"size\": 200, \"sort\": [{\"@timestamp\": {\"order\": \"asc\"}}]}",
+      "file": "evidence/16-opensearch-by-order.json",
+      "bytes": 9456,
+      "sha256": "5b068ad1f236deb36910faee0e753f8c180603e33f7bccba452e8b928fa1f6e7",
+      "count": 5
+    },
+    {
+      "n": 17,
+      "source": "opensearch",
+      "question": "log lines with one of the trace ids",
+      "request": "POST http://localhost:29200/otel-logs-*/_search {\"query\": {\"query_string\": {\"query\": \"traceId:a4013e836e1b52a0dac860b7b701f713 OR traceId:d02a3f06dec1b9b456e5ce05f392fd13 OR traceId:0138fcfe9e569ac680e9d74c9d008348\"}}, \"size\": 200, \"sort\": [{\"@timestamp\": {\"order\": \"asc\"}}]}",
+      "file": "evidence/17-opensearch-by-trace.json",
+      "bytes": 73689,
+      "sha256": "bc3234e082621c9d201f6e8df7d530a200e2e3d223f47ae76af2cf68be31878a",
+      "count": 45
+    },
+    {
+      "n": 18,
+      "source": "cloud-logging",
+      "question": "container stdout lines that contain the order id",
+      "request": "gcloud logging read 'resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"astronomy\" AND textPayload:\"7c8c01c4-ba22-11f1-903b-b295684fc89c\"' --freshness=6h --format=json --project=project-d60c3a2f-933c-42a2-8b4",
+      "file": "evidence/18-cloudlogging-by-order.json",
+      "bytes": 4701,
+      "sha256": "c594cea9e395cfbb4e1bb3cf0f0fcafea3bedef304ff2be0035db1066294290e",
+      "count": 3
+    }
+  ]
+}

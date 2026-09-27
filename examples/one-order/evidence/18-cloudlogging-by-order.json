@@ -1,0 +1,95 @@
+[
+  {
+    "insertId": "f1y2bnzkgb8mlo6r",
+    "labels": {
+      "compute.googleapis.com/resource_name": "gke-cohack-default-pool-60ceed84-tv57",
+      "k8s-pod/app_kubernetes_io/component": "accounting",
+      "k8s-pod/app_kubernetes_io/name": "accounting",
+      "k8s-pod/app_kubernetes_io/version": "3.1.0",
+      "k8s-pod/opentelemetry_io/name": "accounting",
+      "k8s-pod/pod-template-hash": "5457fc4d4d",
+      "k8s-pod/topology_kubernetes_io/region": "us-central1",
+      "k8s-pod/topology_kubernetes_io/zone": "us-central1-a",
+      "logging.gke.io/top_level_controller_name": "accounting",
+      "logging.gke.io/top_level_controller_type": "Deployment"
+    },
+    "logName": "projects/project-d60c3a2f-933c-42a2-8b4/logs/stdout",
+    "receiveTimestamp": "2026-09-27T03:21:12.869241764Z",
+    "resource": {
+      "labels": {
+        "cluster_name": "cohack",
+        "container_name": "accounting",
+        "location": "us-central1-a",
+        "namespace_name": "astronomy",
+        "pod_name": "accounting-5457fc4d4d-4dcwg",
+        "project_id": "project-d60c3a2f-933c-42a2-8b4"
+      },
+      "type": "k8s_container"
+    },
+    "severity": "INFO",
+    "textPayload": "      Order details: { \"orderId\": \"7c8c01c4-ba22-11f1-903b-b295684fc89c\", \"shippingTrackingId\": \"5d204c13-343a-4c58-9cff-ccf6a255dc08\", \"shippingCost\": { \"currencyCode\": \"USD\", \"units\": \"89\", \"nanos\": 900000000 }, \"shippingAddress\": { \"streetAddress\": \"One Microsoft Way\", \"city\": \"Redmond\", \"state\": \"WA\", \"country\": \"United States\", \"zipCode\": \"98052\" }, \"items\": [ { \"item\": { \"productId\": \"9SIQT8TOJO\", \"quantity\": 5 }, \"cost\": { \"currencyCode\": \"USD\", \"units\": \"3599\" } }, { \"item\": { \"productId\": \"LS4PSXUNUM\", \"quantity\": 5 }, \"cost\": { \"currencyCode\": \"USD\", \"units\": \"57\", \"nanos\": 799999999 } } ] }.",
+    "timestamp": "2026-09-27T03:21:10.714916912Z"
+  },
+  {
+    "insertId": "70o7nxay7ihdoxei",
+    "labels": {
+      "compute.googleapis.com/resource_name": "gke-cohack-default-pool-60ceed84-dl9s",
+      "k8s-pod/app_kubernetes_io/component": "fraud-detection",
+      "k8s-pod/app_kubernetes_io/name": "fraud-detection",
+      "k8s-pod/app_kubernetes_io/version": "3.1.0",
+      "k8s-pod/opentelemetry_io/name": "fraud-detection",
+      "k8s-pod/pod-template-hash": "5f8c98668c",
+      "k8s-pod/topology_kubernetes_io/region": "us-central1",
+      "k8s-pod/topology_kubernetes_io/zone": "us-central1-a",
+      "logging.gke.io/top_level_controller_name": "fraud-detection",
+      "logging.gke.io/top_level_controller_type": "Deployment"
+    },
+    "logName": "projects/project-d60c3a2f-933c-42a2-8b4/logs/stdout",
+    "receiveTimestamp": "2026-09-27T03:21:14.817720444Z",
+    "resource": {
+      "labels": {
+        "cluster_name": "cohack",
+        "container_name": "fraud-detection",
+        "location": "us-central1-a",
+        "namespace_name": "astronomy",
+        "pod_name": "fraud-detection-5f8c98668c-8q7qq",
+        "project_id": "project-d60c3a2f-933c-42a2-8b4"
+      },
+      "type": "k8s_container"
+    },
+    "severity": "INFO",
+    "textPayload": "2026-09-27 03:21:10 - fraud-detection - Consumed record with orderId: 7c8c01c4-ba22-11f1-903b-b295684fc89c, and updated total count to: 1133 trace_id=0138fcfe9e569ac680e9d74c9d008348 span_id=4d7c044e5b8932da trace_flags=03 ",
+    "timestamp": "2026-09-27T03:21:10.714893035Z"
+  },
+  {
+    "insertId": "jhwwtybx9c63w9nz",
+    "labels": {
+      "compute.googleapis.com/resource_name": "gke-cohack-default-pool-60ceed84-98q3",
+      "k8s-pod/app_kubernetes_io/component": "email",
+      "k8s-pod/app_kubernetes_io/name": "email",
+      "k8s-pod/app_kubernetes_io/version": "3.1.0",
+      "k8s-pod/opentelemetry_io/name": "email",
+      "k8s-pod/pod-template-hash": "68c64794dc",
+      "k8s-pod/topology_kubernetes_io/region": "us-central1",
+      "k8s-pod/topology_kubernetes_io/zone": "us-central1-a",
+      "logging.gke.io/top_level_controller_name": "email",
+      "logging.gke.io/top_level_controller_type": "Deployment"
+    },
+    "logName": "projects/project-d60c3a2f-933c-42a2-8b4/logs/stdout",
+    "receiveTimestamp": "2026-09-27T03:21:11.955527637Z",
+    "resource": {
+      "labels": {
+        "cluster_name": "cohack",
+        "container_name": "email",
+        "location": "us-central1-a",
+        "namespace_name": "astronomy",
+        "pod_name": "email-68c64794dc-x2wqx",
+        "project_id": "project-d60c3a2f-933c-42a2-8b4"
+      },
+      "type": "k8s_container"
+    },
+    "severity": "INFO",
+    "textPayload": "Order confirmation email sent for order 7c8c01c4-ba22-11f1-903b-b295684fc89c",
+    "timestamp": "2026-09-27T03:21:10.709590554Z"
+  }
+]
