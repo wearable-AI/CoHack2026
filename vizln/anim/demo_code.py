@@ -18,7 +18,7 @@ class DemoCode(Clip):
 
     def story(self):
         # 1. Code Panel (Top Left)
-        panel, lines = self.code(SRC, "go", where=LEFT * 1.0 + UP * 1.0, w=7.5, h=4.6)
+        panel, lines = self.code(SRC, "go", at=[-2.5, 1.2, 0], w=8.5, h=4.6)
         
         # 2. Architecture Chain (Top Right)
         flow, boxes = self.chain(
