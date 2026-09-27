@@ -18,13 +18,13 @@ class DemoCode(Clip):
 
     def story(self):
         # 1. Code Panel (Top Left)
-        panel, lines = self.code(SRC, "go", at=[-2.5, 1.2, 0], w=8.5, h=4.6)
+        panel, lines = self.code(SRC, "go", at=[-3.6, 0.6, 0], w=6.4, h=3.6)
         
-        # 2. Architecture Chain (Top Right)
+        # 2. Architecture Chain (Right)
         flow, boxes = self.chain(
             ["Checkout", "Shipping", "Quote"],
             colours=[BLUE_, TEAL_, RED_],
-            where=RIGHT * 3.5 + UP * 1.5, w=4.0, h=1.0,
+            where=RIGHT * 3.8 + UP * 0.6, w=3.4, h=0.8,
             caption="Microservice Architecture",
         )
         
@@ -32,7 +32,7 @@ class DemoCode(Clip):
         clock = self.tracker(0)
         tl = self.timeline(
             ["Checkout", "Shipping", "Quote"],
-            t_max=12, w=10.0, h=2.5, where=DOWN * 1.8, step=2
+            t_max=12, w=11.0, h=2.2, where=DOWN * 2.2, step=2
         )
         self.add(tl.playhead(clock))
 
